@@ -26,5 +26,5 @@ setup(name='SCALE',
 	  author_email='',
 	  url='',
 	  packages=['scale', ],
-	  scripts=['SCALE.py','chromVAR.R'],
+	  scripts=['scripts/SCALE','scripts/chromVAR'],
 	 )
