@@ -17,12 +17,15 @@ To clone the repository and install manually, run the following from a terminal:
 
 The following code runs SCALE on test data located in the SCALE repository.
 
-SCALE -d data/data.txt -k 6
+	SCALE -d data/data.txt -k 6
 
-    import magic
-    import pandas as pd
-    import matplotlib.pyplot as plt
+Use functions in SCALE.
+
+    import scale
+	from scale import *
+    from scale.plot import *
+	from scale.utils import *
     
 
 #### Tutorials
-
+https://github.com/jsxlei/SCALE/tree/master/notebooks
