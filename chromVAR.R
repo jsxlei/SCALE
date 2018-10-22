@@ -1,0 +1,91 @@
+#!/usr/bin/env Rscript
+
+library(chromVAR, quietly = TRUE)
+library(motifmatchr, quietly = TRUE)
+library(BSgenome.Hsapiens.UCSC.hg19, quietly = TRUE)
+library(SummarizedExperiment, quietly = TRUE)
+
+# library(gplots) 
+# library(RColorBrewer)
+library(optparse)
+
+option_list = list(
+    make_option(c("-i", "--inputdir"), type="character"),
+	make_option(c("--peakfile"), type='character'),
+    make_option(c("-o", "--outdir"), type='character', default=''),
+	make_option(c("--dim"), type="integer", default=10),
+	make_option(c("--process"), type='logical', default=FALSE)
+); 
+ 
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+
+apply_chromVAR=function(frag_counts, frag_peaks, assignments){
+#     frag_peaks = resize(frag_peaks, width = 500, fix = "center")
+    frag_counts = SummarizedExperiment(assays=list(counts=as.matrix(frag_counts)),
+                                       colData=DataFrame(assignments = assignments),
+                                       rowRanges=frag_peaks)
+    frag_counts = addGCBias(frag_counts, genome = BSgenome.Hsapiens.UCSC.hg19)
+    motifs <- getJasparMotifs()
+    motif_ix <- matchMotifs(motifs, frag_counts, genome = BSgenome.Hsapiens.UCSC.hg19)
+    devTopPeaks <- computeDeviations(object = frag_counts, 
+                                 annotations = motif_ix)
+    return(devTopPeaks)
+}
+
+get_feat_dev=function(sub_counts, sub_peaks, name){
+	if (opt$process){
+		out = process(sub_counts, sub_peaks)
+		sub_counts = out[[1]];
+		sub_peaks = out[[2]];
+	}
+	
+	print(dim(sub_counts))
+    devTopPeaks = apply_chromVAR(sub_counts, sub_peaks, assignments)
+    variabilityTopPeaks = computeVariability(devTopPeaks)
+    devTopPeaks.scores = deviationScores(devTopPeaks)
+    write.table(devTopPeaks.scores, paste0(outdir, paste0('dev', name)), quote=F, sep='\t')
+    write.table(variabilityTopPeaks, paste0(outdir,paste0('var', name)), quote=F, sep='\t')
+    # plot_heatmap(devTopPeaks.scores, variabilityTopPeaks)
+}
+
+process = function(frag_counts, sub_peaks, cutoff=800){
+    index = which(width(sub_peaks) <= cutoff)
+    sub_peaks = sub_peaks[index]
+    sub_peaks = resize(sub_peaks, width = 500, fix = "center")
+    frag_counts = frag_counts[index,]
+    return(list(frag_counts, sub_peaks))
+}
+
+
+
+inputdir = opt$inputdir
+if(opt$outdir!=''){
+	outdir = opt$outdir
+}else{
+	outdir = paste0(inputdir, '/chromVAR/')
+}
+dir.create(outdir, recursive=TRUE, showWarnings=FALSE)
+
+peak_dir = paste0(inputdir, '/specific_peaks/')
+data_file = paste0(inputdir, '/imputed_data.txt')
+assign_file = paste0(inputdir, '/cluster_assignments.txt')
+
+peaks = getPeaks(opt$peakfile) 
+fragment_counts = read.table(data_file, row.names=1, header=T)
+assignments = read.table(assign_file)$V2
+
+peak_index = read.table(paste0(peak_dir, 'peak_index.txt'))$V1
+index = row.names(fragment_counts)%in%peak_index
+sub_counts = fragment_counts[index,]
+sub_peaks = peaks[index];
+get_feat_dev(sub_counts, sub_peaks, '')
+
+for (i in seq(0,opt$dim-1)){
+    peak_index = read.table(paste0(peak_dir, 'peak_index', i,'.txt'))$V1
+	index = row.names(fragment_counts)%in%peak_index
+    sub_counts = fragment_counts[index,]
+    sub_peaks = peaks[index]
+    get_feat_dev(sub_counts, sub_peaks, i)
+}

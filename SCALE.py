@@ -4,7 +4,7 @@
 # Created Time : Sat 28 Apr 2018 08:31:29 PM CST
 
 # File Name: SCALE.py
-# Description: Single-cell ATAC-seq analysis via feature extraction.
+# Description: Single-Cell ATAC-seq Analysis via Latent feature Extraction.
 	Input: 
 		scATAC-seq data
 	Output:
@@ -30,7 +30,7 @@ from scale import config
 	
 if __name__ == '__main__':
 
-	parser = argparse.ArgumentParser(description='SCALE: Single-cell ATAC-seq analysis via feature extraction')
+	parser = argparse.ArgumentParser(description='SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction')
 	parser.add_argument('--data', '-d', type=str, help='input data matrix peaks x samples')
 	parser.add_argument('--n_centroids', '-k', type=int, default=None, help='cluster number')
 	parser.add_argument('--sep', type=str, default='\t', help='input data sep format \t or , ')
@@ -89,7 +89,9 @@ if __name__ == '__main__':
 	else:
 		epochs = args.epochs
 	
-	print("********** SCALE ***********\n")
+	print("**********************************************************************")
+	print("  SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction")
+	print("**********************************************************************\n")
 	print("======== Parameters ========")
 	print('Cell number: {}\nInput_dim: {}\nn_centroids: {}\nEpoch: {}\nSeed: {}'.format(
 		data.shape[0], input_dim, k, epochs, args.seed))

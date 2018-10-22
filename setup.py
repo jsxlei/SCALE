@@ -20,10 +20,11 @@ install_requires = [
 ]
 
 setup(name='SCALE',
-	  version='1.0',
-	  description='Single-cell ATAC-seq analysis via feature extraciton',
+	  version='0.8',
+	  description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
 	  author='Xiong Lei',
 	  author_email='',
 	  url='',
 	  packages=['scale', ],
+	  scripts=['SCALE.py','chromVAR.R'],
 	 )
