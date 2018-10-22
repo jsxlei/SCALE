@@ -28,4 +28,4 @@ Use functions in SCALE.
     
 
 #### Tutorials
-https://github.com/jsxlei/SCALE/tree/master/notebooks
+https://github.com/jsxlei/SCALE/tree/master/notebooks/Demo.ipynb
