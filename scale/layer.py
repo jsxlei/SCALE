@@ -17,8 +17,6 @@ from torch.nn import init
 import math
 import numpy as np
 
-from sklearn.mixture import GaussianMixture
-
 
 def build_mlp(layers, activation=nn.ReLU(), bn=False, dropout=0):
 	"""
@@ -110,22 +108,6 @@ class DeterministicWarmup(object):
         self.t = self.t_max if t > self.t_max else t
         return self.t
 
-def fit_GMM(n_centroids, data):
-	gmm = GaussianMixture(n_components=n_centroids, covariance_type='diag')
-	gmm.fit(data)
-	pred = gmm.predict(data)
-	
-	return gmm, pred
-
-def init_gmm_params(model, data):
-	# feature = model.get_hidden(data)
-	z = model.encoder(data)[0].detach().data.cpu().numpy()
-	gmm, _ = fit_GMM(model.n_centroids, z)
-	model.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))
-	model.var_c.data.copy_(torch.from_numpy(gmm.covariances_.T.astype(np.float32)))
-	
-
-# init_gmm_params(model, get_iterator(True), get_iterator(False), device=device)
 
 ###################
 ###################

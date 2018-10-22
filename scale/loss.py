@@ -46,7 +46,7 @@ def elbo(recon_x, x, z_params, binary=True):
 	# return likelihood, kld
 
 
-def elbo_VaDE(recon_x, x, gamma, c_params, z_params, binary=True):
+def elbo_SCALE(recon_x, x, gamma, c_params, z_params, binary=True):
 	"""
 	L elbo(x) = Eq(z,c|x)[ log p(x|z) ] - KL(q(z,c|x)||p(z,c))
 			  = Eq(z,c|x)[ log p(x|z) + log p(z|c) + log p(c) - log q(z|x) - log q(c|x) ]

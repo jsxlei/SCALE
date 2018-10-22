@@ -11,6 +11,7 @@
 
 import numpy as np
 import pandas as pd
+import os
 import torch
 from torch.utils.data import Dataset, TensorDataset, DataLoader
 from sklearn.metrics import f1_score
@@ -18,124 +19,13 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder, scale
 from sklearn.metrics import classification_report, silhouette_score, confusion_matrix, adjusted_rand_score
 
 
-# ================= Metrics ===================
-# =============================================
-
-def cluster_acc(Y_pred, Y):
-	"""
-	Calculate clustering accuracy
-	Args:
-		Y_pred: predict y classes
-		Y: true y classes
-	Return:
-		f1_score: clustering f1 score
-		y_pred: reassignment index predict y classes
-		indices: classes assignment
-	"""
-	from sklearn.utils.linear_assignment_ import linear_assignment
-	assert Y_pred.size == Y.size
-	D = max(Y_pred.max(), Y.max())+1
-	w = np.zeros((D,D), dtype=np.int64)
-	for i in range(Y_pred.size):
-		w[Y_pred[i], Y[i]] += 1
-	ind = linear_assignment(w.max() - w)
-
-	# acc = sum([w[i,j] for i,j in ind])*1.0/Y_pred.size
-	y_ = reassign_cluster(Y_pred, ind)
-	f1 = f1_score(Y, y_, average='micro')
-	return f1, y_
-
-def reassign_cluster(y_pred, index):
-	y_ = np.zeros_like(y_pred)
-	for i, j in index:
-		y_[np.where(y_pred==i)] = j
-	return y_
-
-
-def cal_silhouette(data, pred, metric='cosine'):
-	"""
-	Calculate silhouette_score
-	"""
-	try:
-		score = silhouette_score(data, pred, random_state=0, metric=metric)
-	except Exception as error:
-		print(error)
-		score = 0
-
-	return score
-
-
-def cluster_report(ref, pred, classes):
-	"""
-	Print Cluster Report
-	"""
-	f1, pred = cluster_acc(pred, ref)
-	cm = confusion_matrix(ref, pred)
-	print(cm)
-	print('\n')
-	print(classification_report(ref, pred, target_names=classes))
-	return cm
-
-
-def compare_with_other_methods(model, data, k, hidden=10, device='cpu', ref=None):
-	"""
-	Compare with other methods including:
-		k-means, 
-		hclust,
-		PCA+k-means,
-		tSNE+k-means,
-		GMM
-		...
-	"""
-	from sklearn.cluster import KMeans, AgglomerativeClustering
-	from sklearn.mixture import GaussianMixture
-	from sklearn.manifold import TSNE
-	from sklearn.decomposition import PCA
-
-	methods = ['k-means', 'hclust', 'PCA+k-means', 'tSNE+k-means', 'SCALE']
-	print('-'*60)
-	if ref is not None:
-		print('Method\t\tSilhouette\tF1_score\tARI')
-	else:
-		print('Method\t\tSilhouette')
-	print('-'*60)
-	for method in methods:
-		if method == 'SCALE':
-			pred = model.predict(data.to(device))
-		elif method == 'Imputed':
-			recon_x = model(data.to(device))
-			pred = model.predict(recon_x)
-		elif method == 'hclust':
-			pred = AgglomerativeClustering(n_clusters=k).fit_predict(data)
-		elif method == 'GMM':
-			pred = GaussianMixture(n_components=n_centroids, covariance_type='diag').fit_predict(data)
-		elif method == 'k-means':
-			pred = KMeans(n_clusters=k).fit_predict(data)
-		elif method == 'PCA+k-means':
-			feature = PCA(n_components=hidden).fit_transform(data)
-			pred = KMeans(n_clusters=k).fit_predict(feature)
-		elif method == 'tSNE+k-means':
-			feature = TSNE(n_components=2).fit_transform(data)
-			pred = KMeans(n_clusters=k).fit_predict(feature)
-		else:
-			print('No such method')
-		score = cal_silhouette(data, pred)
-
-		if ref is not None:
-			f1_score, pred = cluster_acc(pred, ref)
-			ari_score = adjusted_rand_score(ref, pred)
-			print('{:12}\t{:.3f}\t\t{:.3f}\t\t{:.3f}'.format(method, score, f1_score, ari_score))
-		else:
-			print('{:12}\t{:.4f}'.format(method, score))
-
-	print('-'*60)
-
-
 
 # ============== Data Processing ==============
 # =============================================
 
-def get_loader(data_file, input_dim=None, sep='\t', batch_size=16, gene_filter=False, X=6, log_transform=False, normalize=True):
+def get_loader(data_file, input_dim=None, sep='\t', 
+			   batch_size=16, gene_filter=False, X=6, log_transform=False,
+			   normalize=True):
 	"""
 	Load data
 	Input:
@@ -152,7 +42,7 @@ def get_loader(data_file, input_dim=None, sep='\t', batch_size=16, gene_filter=F
 	if log_transform:
 		data = np.log2(data+1);print('* Log Transform *')
 	data = data.T
-	print('data shape: {}'.format(data.shape))
+	# print('data shape: {}'.format(data.shape))
 
 	input_dim = input_dim if input_dim else data.shape[1]
 	# if input_dim != data.shape[1]:
@@ -169,7 +59,7 @@ def get_loader(data_file, input_dim=None, sep='\t', batch_size=16, gene_filter=F
 	return dataloader, data, index, raw_index, columns, norm	
 
 
-def read_labels(ref):
+def read_labels(ref, return_enc=False):
 	"""
 	Read labels and encode to 0, 1 .. k with class names 
 	"""
@@ -179,7 +69,10 @@ def read_labels(ref):
 	encode = LabelEncoder()
 	ref = encode.fit_transform(ref.values.squeeze())
 	classes = encode.classes_
-	return ref, classes
+	if return_enc:
+		return ref, classes, encode
+	else:
+		return ref, classes
 
 def sort_by_mad(data, axis=0):
 	"""
@@ -287,33 +180,97 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
 		specific_peaks.append(weight_index[index])
 	return specific_peaks
 
+def save_results(model, data, data_params, outdir, device='cpu'):
+	peak_dir = os.path.join(outdir, 'specific_peaks')
+	if not os.path.exists(outdir):
+		os.makedirs(outdir)
+		os.makedirs(peak_dir)
+		
+	model.to(device)
+	data = data.to(device)
+	weight_index, raw_index, columns, norm = data_params
+	### output ###
+	# 1. latent GMM feature
+	feature = model.get_feature(data)
+	
+	# 2. cluster assignments
+	pred = model.predict(data)
+	
+	# 3. imputed data
+	recon_x = model(data).data.cpu().numpy()
+	recon_x = norm.inverse_transform(recon_x)
+	
+	# 4. cell type specific peaks
+	weight = model.state_dict()['decoder.reconstruction.weight'].cpu().numpy()
+	specific_peaks = peak_selection(weight, weight_index, kind='both', cutoff=2.5)
+	
+	
+	torch.save(model.state_dict(), os.path.join(outdir, 'model.pt'))
+	assign_file = os.path.join(outdir, 'cluster_assignments.txt')
+	feature_file = os.path.join(outdir, 'feature.txt')
+	impute_file = os.path.join(outdir, 'imputed_data.txt')
 
-def feature_specifity(feature_file, assignment_file):
+	pd.Series(pred).to_csv(assign_file, sep='\t', header=False) # save cluster assignments
+	pd.DataFrame(feature).to_csv(feature_file, sep='\t', header=False) # save latent feature
+	# open(index_file, 'w').write('\n'.join(map(str,weight_index)))
+	pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
+
+	# save specific peaks
+	all_peaks = []
+	for i, peaks in enumerate(specific_peaks):
+		peak_file = os.path.join(peak_dir, 'peak_index{}.txt'.format(i))
+		open(peak_file, 'w').write('\n'.join(list(peaks)))
+		all_peaks += list(peaks)
+	peak_file = os.path.join(peak_dir, 'peak_index.txt')
+	open(peak_file, 'w').write('\n'.join(set(all_peaks)))
+	
+# ================= Metrics ===================
+# =============================================
+
+def cluster_acc(Y_pred, Y):
 	"""
-	Calculate the feature specifity:
-
-	Input:
-		feature_file: output feature.txt file
+	Calculate clustering accuracy
+	Inputs:
+		Y_pred: predict y classes
+		Y: true y classes
+	Return:
+		f1_score: clustering f1 score
+		y_pred: reassignment index predict y classes
+		indices: classes assignment
 	"""
-	feature = pd.read_csv(feature_file, sep='\t', header=None, index_col=0)
-	ref, classes = read_labels(assignment_file)
-	n_cluster = max(ref) + 1
-	pvalue_mat = np.zeros((10, n_cluster))
-	for cluster in range(n_cluster):
-		for feat in range(10):
-			a = feature.iloc[:, feat][ref == cluster]
-			b = feature.iloc[:, feat][ref != cluster]
-			pvalue = f_oneway(a,b)[1]
-			pvalue_mat[feat, cluster] = pvalue
+	from sklearn.utils.linear_assignment_ import linear_assignment
+	assert Y_pred.size == Y.size
+	D = max(Y_pred.max(), Y.max())+1
+	w = np.zeros((D,D), dtype=np.int64)
+	for i in range(Y_pred.size):
+		w[Y_pred[i], Y[i]] += 1
+	ind = linear_assignment(w.max() - w)
 
-	plt.figure(figsize=(6, 6))
-	grid = sns.heatmap(-np.log10(pvalue_mat), cmap='RdBu_r', 
-					   vmax=20,
-					   yticklabels=np.arange(10)+1, 
-					   xticklabels=classes[:n_cluster])
-	grid.set_ylabel('Feature', fontsize=18)
-	grid.set_xticklabels(labels=classes[:n_cluster], rotation=45, fontsize=18)
-	grid.set_yticklabels(labels=np.arange(10)+1, fontsize=16)
-#     grid.set_title(dataset, fontsize=18)
-	cbar = grid.collections[0].colorbar
-	cbar.set_label('-log10 (Pvalue)', fontsize=18) #, rotation=0, x=-0.9, y=0)
+	# acc = sum([w[i,j] for i,j in ind])*1.0/Y_pred.size
+	y_ = reassign_cluster(Y_pred, ind)
+	f1 = f1_score(Y, y_, average='micro')
+	return f1, y_
+
+def reassign_cluster(y_pred, index):
+	y_ = np.zeros_like(y_pred)
+	for i, j in index:
+		y_[np.where(y_pred==i)] = j
+	return y_
+
+
+def cluster_report(ref, pred, classes):
+	"""
+	Print Cluster Report
+	"""
+	f1, pred = cluster_acc(pred, ref)
+	cm = confusion_matrix(ref, pred)
+	print('\n## Confusion matrix ##\n')
+	print(cm)
+	print('\n## Cluster Report ##\n')
+	print(classification_report(ref, pred, target_names=classes))
+	ari_score = adjusted_rand_score(ref, pred)
+	print("\nAdjusted Rand score : {:.4f}".format(ari_score))
+
+
+
+

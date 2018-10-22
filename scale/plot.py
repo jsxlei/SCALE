@@ -14,8 +14,26 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from visdom import Visdom
 
-plt.rcParams['savefig.dpi'] = 300
-plt.rcParams['figure.dpi'] = 300
+# plt.rcParams['savefig.dpi'] = 300
+# plt.rcParams['figure.dpi'] = 300
+
+
+class VisdomLinePlotter(object):
+	"""Plots to Visdom"""
+	def __init__(self, name=''):
+		self.viz = Visdom()
+		self.name = name
+		self.plots = {}
+	def plot(self, var_name, split_name, x, y):
+		if var_name not in self.plots:
+			self.plots[var_name] = self.viz.line(X=np.array([x,x]), Y=np.array([y,y]), opts=dict(
+				legend=[split_name],
+				title=self.name+var_name,
+				xlabel='Epochs',
+				ylabel=var_name
+			))
+		else:
+			self.viz.updateTrace(X=np.array([x]), Y=np.array([y]), win=self.plots[var_name], name=split_name)
 
 
 def plot_confusion_matrix(cm, x_classes, y_classes,
@@ -97,7 +115,7 @@ def plot_heatmap(X, y, classes,
 	col_colors = [ colors[i] for i in y ]
 	legend_TN = [mpatches.Patch(color=c, label=l) for c,l in zip(colors, classes)]
 
-	
+
 	if show_legend:
 		kw.update({'col_colors':col_colors})
 
@@ -110,7 +128,7 @@ def plot_heatmap(X, y, classes,
 		grid.cax.set_title(cax_title, fontsize=6, y=0.35)
 	# grid.ax_heatmap.set_position((0.3,0.,0.7,0.9))
 
-	if show_color:
+	if show_legend:
 		grid.ax_heatmap.legend(loc='upper center', 
 							   bbox_to_anchor=bbox_to_anchor, 
 							   handles=legend_TN, 
@@ -118,7 +136,7 @@ def plot_heatmap(X, y, classes,
 							   frameon=False, 
 							   ncol=3)
 		grid.ax_col_colors.tick_params(labelsize=6, length=0, labelcolor='orange')
-		
+
 	grid.ax_heatmap.set_xlabel(xlabel)
 	grid.ax_heatmap.set_ylabel(ylabel, fontsize=8)
 	grid.ax_heatmap.set_xticklabels('')
@@ -133,7 +151,6 @@ def plot_heatmap(X, y, classes,
 		plt.savefig(save, format='pdf')
 	else:
 		plt.show()
-	return grid
 
 
 def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, save=None, name='', legend=True):
@@ -191,21 +208,90 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
 	else:
 		plt.show()
 	return X
-				  
 
-class VisdomLinePlotter(object):
-	"""Plots to Visdom"""
-	def __init__(self, name=''):
-		self.viz = Visdom()
-		self.name = name
-		self.plots = {}
-	def plot(self, var_name, split_name, x, y):
-		if var_name not in self.plots:
-			self.plots[var_name] = self.viz.line(X=np.array([x,x]), Y=np.array([y,y]), opts=dict(
-				legend=[split_name],
-				title=self.name+var_name,
-				xlabel='Epochs',
-				ylabel=var_name
-			))
-		else:
-			self.viz.updateTrace(X=np.array([x]), Y=np.array([y]), win=self.plots[var_name], name=split_name)
+
+def corr_heatmap(X, ref, classes, save=None, **kw):
+	"""
+	Plot cell-to-cell correlation matrix heatmap
+	"""
+	index = np.argsort(ref)
+	X = X.iloc[:,index]
+	ref = ref[index]
+
+	import matplotlib.patches as mpatches  # add legend
+	colormap = plt.cm.tab20
+
+	n_centroids = max(ref)+1
+	colors = [colormap(i) for i in range(n_centroids)]
+	row_colors = col_colors = [ colors[i] for i in ref ]
+	bbox_to_anchor = (0.4, 1.2)
+	legend_TN = [mpatches.Patch(color=c, label=l) for c,l in zip(colors, classes)]
+
+
+	corr = X.corr()
+	# cbar_kws={'ticks':[0,0.5,1]}
+	cbar_kws={"orientation": "horizontal", "ticks":[0, 1]}
+	grid = sns.clustermap(corr, cmap='RdBu_r', **kw,
+#                           row_colors=row_colors, 
+						  col_colors=col_colors, 
+						  row_cluster=False,
+						  col_cluster=False,
+						  cbar_kws=cbar_kws
+						 )
+	grid.ax_heatmap.set_xticklabels('')
+	grid.ax_heatmap.set_yticklabels('')
+	grid.ax_heatmap.tick_params(axis='x', length=0)
+	grid.ax_heatmap.tick_params(axis='y', length=0)
+	grid.ax_heatmap.legend(loc='upper center', 
+						   bbox_to_anchor=bbox_to_anchor, 
+						   handles=legend_TN, 
+						   fontsize=6, 
+						   frameon=False, 
+						   ncol=3)
+
+	grid.cax.set_position((0.8, 0.76, .1, .02)) 
+	# grid.cax.set_position((0.95, 0.3, .02, .1)) 
+	grid.cax.tick_params(length=1, labelsize=4, rotation=0)
+	grid.cax.set_title('Pearson', fontsize=6, y=0.8)
+
+	if save:
+		plt.savefig(save, format='pdf')
+	else:
+		plt.show()
+		
+		
+def feature_specifity(feature, ref, classes):
+	"""
+	Calculate the feature specifity:
+
+	Input:
+		feature: latent feature
+		ref: cluster assignments
+		classes: cluster classes
+	"""
+	# feature = pd.read_csv(feature_file, sep='\t', header=None, index_col=0)
+	# ref, classes = read_labels(assignment_file)
+	from scipy.stats import f_oneway
+	n_cluster = max(ref) + 1
+	dim = feature.shape[1] # feature dimension
+	pvalue_mat = np.zeros((dim, n_cluster))
+	for cluster in range(n_cluster):
+		for feat in range(dim):
+			a = feature.iloc[:, feat][ref == cluster]
+			b = feature.iloc[:, feat][ref != cluster]
+			pvalue = f_oneway(a,b)[1]
+			pvalue_mat[feat, cluster] = pvalue
+
+	plt.figure(figsize=(6, 6))
+	grid = sns.heatmap(-np.log10(pvalue_mat), cmap='RdBu_r', 
+					   vmax=20,
+					   yticklabels=np.arange(10)+1, 
+					   xticklabels=classes[:n_cluster])
+	grid.set_ylabel('Feature', fontsize=18)
+	grid.set_xticklabels(labels=classes[:n_cluster], rotation=45, fontsize=18)
+	grid.set_yticklabels(labels=np.arange(dim)+1, fontsize=16)
+#     grid.set_title(dataset, fontsize=18)
+	cbar = grid.collections[0].colorbar
+	cbar.set_label('-log10 (Pvalue)', fontsize=18) #, rotation=0, x=-0.9, y=0)
+
+

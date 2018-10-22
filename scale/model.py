@@ -16,9 +16,10 @@ from torch.nn import init
 import math
 import numpy as np
 from itertools import repeat
+from sklearn.mixture import GaussianMixture
 
-from .layer import Encoder, Decoder, build_mlp
-from .loss import elbo, elbo_VaDE
+from .layer import Encoder, Decoder, build_mlp, DeterministicWarmup
+from .loss import elbo, elbo_SCALE
 		
 
 class VAE(nn.Module):
@@ -78,9 +79,8 @@ class VAE(nn.Module):
 		return -(likelihood - kld) 
 	
 	def get_feature(self, x):
-		self.eval()
-		
-		z = self.encoder(x)[1].detach().data.cpu().numpy()
+		# self.eval()
+		z = self.encoder(x)[0].detach().data.cpu().numpy()
 		return z
 
 	def load_model(self, path):
@@ -90,12 +90,43 @@ class VAE(nn.Module):
 		model_dict.update(pretrained_dict) 
 		self.load_state_dict(model_dict)
 		
+	def fit(self, dataloader,
+		epochs=300,
+		lr=0.002, 
+		weight_decay=5e-4,
+		print_interval=10, 
+		device='cpu',
+		verbose=True,
+		visdom=None,
+	   ):
+
+		optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay) 
+		for epoch in range(epochs):
+			epoch_lr = adjust_learning_rate(lr, optimizer, epoch)	
+			epoch_loss = 0
+			self.train()
+			for i, x in enumerate(dataloader):
+				x = x[0].to(device)
+				optimizer.zero_grad()
+				loss = self.loss_function(x)/len(x)
+				loss.backward()
+				optimizer.step()
+				epoch_loss += loss.item()
+			avg_loss = epoch_loss/len(dataloader)
+
+			# Display Training Process
+			if (epoch+1) % print_interval == 0:
+				if visdom is not None:
+					visdom.plot('_loss', 'loss', epoch, epoch_loss/len(dataloader))
+				if verbose:
+					print('[Epoch {:3d}] Loss: {:.3f} lr: {:.4f}'.format(epoch+1, epoch_loss/len(dataloader), epoch_lr))
+
 		
 	
 class SCALE(VAE):
-	def __init__(self, dims, n_centroids, beta=repeat(1)):
+	def __init__(self, dims, n_centroids):
 		super().__init__(dims)
-		self.beta = beta
+		self.beta = DeterministicWarmup(n=100, t_max=1)
 		self.n_centroids = n_centroids
 		z_dim = dims[1]
 		
@@ -105,17 +136,16 @@ class SCALE(VAE):
 		self.var_c = nn.Parameter(torch.ones(z_dim, n_centroids)) # sigma^2
 		
 	def loss_function(self, x):
-		# c_params = self.pi, self.mu_c, self.var_c
 		z, mu, logvar = self.encoder(x)
 		recon_x = self.decoder(z)
 		gamma, mu_c, var_c, pi = self.get_gamma(z) #, self.n_centroids, c_params)
-		likelihood, kld = elbo_VaDE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
+		likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
 		self.likelihood = likelihood
 		self.kld = kld
 		# return -(likelihood - kld)
 		return -(likelihood - next(self.beta)*kld) 
 		
-	def get_gamma(self, z): # , n_centroids, c_params):
+	def get_gamma(self, z):
 		"""
 		Inference c from z
 
@@ -137,31 +167,44 @@ class SCALE(VAE):
 
 		return gamma, mu_c, var_c, pi
 	
-	def predict(self, x, method='kmeans'):
+	def predict(self, x):
 		"""
-		Inference c from x
-		
-		:param: x, data
-				method, one of 'vade', 'kmeans'
-		
+		Inference cluster assginments from x
+			
+		Input: 
+			x, data matrix
+		Return:
+			predicted cluster assignments
 		"""
 		
 		from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
 		self.eval()
-		if method == 'kmeans':
-			kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
-			feature = self.get_feature(x)
-			try:
-				pred = kmeans.fit_predict(feature); 
-			except:
-				pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
-			
-			return pred
-		elif method == 'vade':
-			
-			z = self.encoder(x)[0].detach()
-			logits = self.get_gamma(z)[0].cpu().detach()
-			pred = np.argmax(logits.numpy(), axis=1)
-			return pred
+
+		kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
+		feature = self.get_feature(x)
+		try:
+			pred = kmeans.fit_predict(feature); 
+		except:
+			pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
+
+		return pred
+		
+	def init_gmm_params(self, data):
+		"""
+		Init SCALE model with GMM model parameters
+		"""
+		z = self.get_feature(data)
+		# z = self.encoder(data)[0].detach().data.cpu().numpy()
+		gmm = GaussianMixture(n_components=self.n_centroids, covariance_type='diag')
+		gmm.fit(z)
+		self.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))
+		self.var_c.data.copy_(torch.from_numpy(gmm.covariances_.T.astype(np.float32)))
+		
+		
 	
+def adjust_learning_rate(init_lr, optimizer, epoch):
+	lr = max(init_lr * (0.9 ** (epoch//10)), 0.0002)
+	for param_group in optimizer.param_groups:
+		param_group["lr"] = lr
+	return lr	
 	
