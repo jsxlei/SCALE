@@ -32,15 +32,14 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction')
 	parser.add_argument('--data', '-d', type=str, help='input data matrix peaks x samples')
 	parser.add_argument('--n_centroids', '-k', type=int, default=None, help='cluster number')
-	parser.add_argument('--sep', type=str, default='\t', help='input data sep format \t or , ')
+	parser.add_argument('--sep', type=str, default='\t', help="input data separation '\t' txt format or ',' for csv format ")
 	parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
-	parser.add_argument('--visdom', '-v', action='store_true', help='Show training process with visdom')
 	parser.add_argument('--no_results', action='store_true', help='Save the results')
 	parser.add_argument('--verbose', action='store_false', help='Print loss of training process')
 	parser.add_argument('--reference', '-r', type=str, default='', help='Whether ground truth available')
 	parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
 	parser.add_argument('--epochs', '-e', type=int, default=None, help='Training epochs')
-	parser.add_argument('--gpu', '-g', type=int, default=0, help='Use gpu when training')
+	parser.add_argument('--device', default='cuda:0', help='Use gpu when training')
 	parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
 	parser.add_argument('--input_dim', type=int, default=None, help='Force input dim')
 	## data preprocessing
@@ -58,8 +57,9 @@ if __name__ == '__main__':
 		torch.cuda.manual_seed_all(seed)
 
 	# path = os.path.join(args.path, args.dataset) #;print(path)
-	device = torch.device("cuda:"+str(args.gpu) if torch.cuda.is_available() else "cpu")
-	
+	args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu"
+	# device = torch.device("cuda:"+str(args.gpu) if (torch.cuda.is_available() and args.gpu) else "cpu")
+	device = torch.device(args.device)
 	# Load data and labels
 	data_params_ = get_loader(args.data, 
 							  args.input_dim, 
@@ -78,10 +78,6 @@ if __name__ == '__main__':
 	else:
 		k = args.n_centroids
 		
-	if args.visdom:
-		visdom = VisdomLinePlotter()
-	else:
-		visdom = None
 		
 	if args.epochs is None:
 		epochs = config.epochs
@@ -92,8 +88,8 @@ if __name__ == '__main__':
 	print("  SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction")
 	print("**********************************************************************\n")
 	print("======== Parameters ========")
-	print('Cell number: {}\nInput_dim: {}\nn_centroids: {}\nEpoch: {}\nSeed: {}'.format(
-		data.shape[0], input_dim, k, epochs, args.seed))
+	print('Cell number: {}\nInput_dim: {}\nn_centroids: {}\nEpoch: {}\nSeed: {}\nDevice: {}'.format(
+		data.shape[0], input_dim, k, epochs, args.seed, args.device))
 	print("============================")
 	
 	dims = [input_dim, config.latent, config.encode_dim, []]
@@ -107,7 +103,6 @@ if __name__ == '__main__':
 				  weight_decay=config.weight_decay, 
 			      epochs=epochs, 
 				  device=device,
-			      visdom=visdom,
 				  verbose=args.verbose
 				   )
 		print('\nRunning Time: {:.2f} s'.format(time.time()-t0))
