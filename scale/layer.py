@@ -109,6 +109,13 @@ class DeterministicWarmup(object):
 
         self.t = self.t_max if t > self.t_max else t
         return self.t
+	
+	def next(self):
+		## enable python 2
+		t = self.t + self.inc
+
+        self.t = self.t_max if t > self.t_max else t
+        return self.t
 
 
 ###################
@@ -121,22 +128,6 @@ class Stochastic(nn.Module):
 	parametrised by mu and log_var.
 	"""
 	def reparametrize(self, mu, logvar):
-		# std = torch.exp(0.5 * log_var)
-		# z = std * epsilon + mu
-		# return z
-	
-		# if self.training:
-		# 	epsilon = Variable(torch.randn(mu.size()), requires_grad=False)
-		# 	if mu.is_cuda:
-		# 		epsilon = epsilon.cuda()
-		# 	std = log_var.mul(0.5).exp_()
-		# 	return mu.addcmul(std, epsilon)
-		# else:
-		# 	return mu
-		# std = torch.exp(0.5*logvar)
-		# eps = torch.randn_like(std)
-		# return eps.mul(std).add_(mu)
-	
 		if self.training:
 			std = torch.exp(0.5*logvar)
 			eps = torch.randn_like(std)
