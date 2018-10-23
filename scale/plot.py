@@ -12,28 +12,9 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
-from visdom import Visdom
 
 # plt.rcParams['savefig.dpi'] = 300
 # plt.rcParams['figure.dpi'] = 300
-
-
-class VisdomLinePlotter(object):
-	"""Plots to Visdom"""
-	def __init__(self, name=''):
-		self.viz = Visdom()
-		self.name = name
-		self.plots = {}
-	def plot(self, var_name, split_name, x, y):
-		if var_name not in self.plots:
-			self.plots[var_name] = self.viz.line(X=np.array([x,x]), Y=np.array([y,y]), opts=dict(
-				legend=[split_name],
-				title=self.name+var_name,
-				xlabel='Epochs',
-				ylabel=var_name
-			))
-		else:
-			self.viz.updateTrace(X=np.array([x]), Y=np.array([y]), win=self.plots[var_name], name=split_name)
 
 
 def plot_confusion_matrix(cm, x_classes, y_classes,
@@ -81,7 +62,6 @@ def plot_confusion_matrix(cm, x_classes, y_classes,
 					 color="white" if cm[i, j] > thresh else "black")
 
 	plt.tight_layout()
-	# plt.xlabel('Reference label')
 	plt.ylabel('Predicted Cluster')
 	if show_cbar:
 		plt.colorbar(shrink=0.8) 
@@ -120,7 +100,7 @@ def plot_heatmap(X, y, classes,
 		kw.update({'col_colors':col_colors})
 
 	cbar_kws={"orientation": "horizontal"}
-	grid = sns.clustermap(X, **kw, yticklabels=True, cbar_kws=cbar_kws)
+	grid = sns.clustermap(X, yticklabels=True, cbar_kws=cbar_kws, **kw)
 	if show_cax:
 		grid.cax.set_position(position)
 		grid.cax.tick_params(length=1, labelsize=4, rotation=0)
@@ -207,7 +187,6 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
 		plt.savefig(save, format='pdf')
 	else:
 		plt.show()
-	return X
 
 
 def corr_heatmap(X, ref, classes, save=None, **kw):
@@ -217,6 +196,7 @@ def corr_heatmap(X, ref, classes, save=None, **kw):
 	index = np.argsort(ref)
 	X = X.iloc[:,index]
 	ref = ref[index]
+	corr = X.corr()
 
 	import matplotlib.patches as mpatches  # add legend
 	colormap = plt.cm.tab20
@@ -227,16 +207,14 @@ def corr_heatmap(X, ref, classes, save=None, **kw):
 	bbox_to_anchor = (0.4, 1.2)
 	legend_TN = [mpatches.Patch(color=c, label=l) for c,l in zip(colors, classes)]
 
-
-	corr = X.corr()
-	# cbar_kws={'ticks':[0,0.5,1]}
-	cbar_kws={"orientation": "horizontal", "ticks":[0, 1]}
-	grid = sns.clustermap(corr, cmap='RdBu_r', **kw,
+	cbar_kws={"orientation": "horizontal", "ticks":[0, 0.5, 1]}
+	grid = sns.clustermap(corr, cmap='RdBu_r', 
 #                           row_colors=row_colors, 
 						  col_colors=col_colors, 
 						  row_cluster=False,
 						  col_cluster=False,
-						  cbar_kws=cbar_kws
+						  cbar_kws=cbar_kws, 
+						  **kw
 						 )
 	grid.ax_heatmap.set_xticklabels('')
 	grid.ax_heatmap.set_yticklabels('')
@@ -269,8 +247,6 @@ def feature_specifity(feature, ref, classes):
 		ref: cluster assignments
 		classes: cluster classes
 	"""
-	# feature = pd.read_csv(feature_file, sep='\t', header=None, index_col=0)
-	# ref, classes = read_labels(assignment_file)
 	from scipy.stats import f_oneway
 	n_cluster = max(ref) + 1
 	dim = feature.shape[1] # feature dimension
