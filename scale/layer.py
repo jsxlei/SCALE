@@ -50,9 +50,10 @@ class Encoder(nn.Module):
 		super(Encoder, self).__init__()
 
 		[x_dim, h_dim, z_dim] = dims
-		self.hidden = build_mlp([x_dim, *h_dim], bn=bn, dropout=dropout)
-
-		self.sample = GaussianSample([x_dim, *h_dim][-1], z_dim)
+		# self.hidden = build_mlp([x_dim, *h_dim], bn=bn, dropout=dropout)
+		self.hidden = build_mlp([x_dim]+h_dim, bn=bn, dropout=dropout)
+		self.sample = GaussianSample(([x_dim]+h_dim)[-1], z_dim)
+		# self.sample = GaussianSample([x_dim, *h_dim][-1], z_dim)
 
 	def forward(self, x):
 		x = self.hidden(x)
@@ -76,9 +77,10 @@ class Decoder(nn.Module):
 
 		[z_dim, h_dim, x_dim] = dims
 
-		self.hidden = build_mlp([z_dim, *h_dim], bn=bn, dropout=dropout)
-
-		self.reconstruction = nn.Linear([z_dim, *h_dim][-1], x_dim)
+		# self.hidden = build_mlp([z_dim, *h_dim], bn=bn, dropout=dropout)
+		self.hidden = build_mlp([z_dim]+h_dim, bn=bn, dropout=dropout)
+		# self.reconstruction = nn.Linear([z_dim, *h_dim][-1], x_dim)
+		self.reconstruction = nn.Linear(([z_dim]+h_dim)[-1], x_dim)
 
 		self.output_activation = output_activation
 
