@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction')
 	parser.add_argument('--data', '-d', type=str, help='input data matrix peaks x samples')
 	parser.add_argument('--n_centroids', '-k', type=int, default=None, help='cluster number')
-	parser.add_argument('--sep', type=str, default='\t', help="input data separation '\t' txt format or ',' for csv format ")
+	parser.add_argument('--sep', type=str, default='\t', help='input data sep format \t or , ')
 	parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
 	parser.add_argument('--no_results', action='store_true', help='Save the results')
 	parser.add_argument('--verbose', action='store_false', help='Print loss of training process')
@@ -42,7 +42,6 @@ if __name__ == '__main__':
 	parser.add_argument('--device', default='cuda:0', help='Use gpu when training')
 	parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
 	parser.add_argument('--input_dim', type=int, default=None, help='Force input dim')
-	## data preprocessing
 	parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
 	parser.add_argument('--gene_filter', action='store_true', help='Perform gene filter as SC3')
 	parser.add_argument('-x', '--pct', type=float, default=6, help='Percent of genes when performing gene filter as SC3')
@@ -56,10 +55,9 @@ if __name__ == '__main__':
 	if torch.cuda.is_available:
 		torch.cuda.manual_seed_all(seed)
 
-	# path = os.path.join(args.path, args.dataset) #;print(path)
-	args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu"
-	# device = torch.device("cuda:"+str(args.gpu) if (torch.cuda.is_available() and args.gpu) else "cpu")
+	args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu" 
 	device = torch.device(args.device)
+	
 	# Load data and labels
 	data_params_ = get_loader(args.data, 
 							  args.input_dim, 
@@ -69,7 +67,8 @@ if __name__ == '__main__':
 							  gene_filter=args.gene_filter,
 							  log_transform=args.log_transform)
 	dataloader, data, data_params = data_params_[0], data_params_[1], data_params_[2:]
-	input_dim = data.shape[1]		
+	cell_num = data.shape[0] 
+	input_dim = data.shape[1] 	
 	
 	if args.n_centroids is None:
 		est_k = estimate_k(data.t())
@@ -77,8 +76,7 @@ if __name__ == '__main__':
 		k = est_k
 	else:
 		k = args.n_centroids
-		
-		
+			
 	if args.epochs is None:
 		epochs = config.epochs
 	else:
@@ -89,35 +87,36 @@ if __name__ == '__main__':
 	print("**********************************************************************\n")
 	print("======== Parameters ========")
 	print('Cell number: {}\nInput_dim: {}\nn_centroids: {}\nEpoch: {}\nSeed: {}\nDevice: {}'.format(
-		data.shape[0], input_dim, k, epochs, args.seed, args.device))
+		cell_num, input_dim, k, epochs, args.seed, args.device))
 	print("============================")
 	
 	dims = [input_dim, config.latent, config.encode_dim, []]
-	model = SCALE(dims, n_centroids=k).to(device)
+	model = SCALE(dims, n_centroids=k, device=device)
+	model.to(device)
+	data = data.to(device)
 	if not args.pretrain:
 		print('\n## Training Model ##')
 		t0 = time.time()
-		model.init_gmm_params(data.to(device))
+		model.init_gmm_params(data)
+		#model.init_gmm_params(dataloader)
 		model.fit(dataloader,
 				  lr=config.lr, 
 				  weight_decay=config.weight_decay, 
 			      epochs=epochs, 
-				  device=device,
 				  verbose=args.verbose
 				   )
 		print('\nRunning Time: {:.2f} s'.format(time.time()-t0))
 	else:
 		print('\n## Loading Model {} ##\n'.format(args.pretrain))
 		model.load_model(args.pretrain)
-		model.to(device)
 		
 	# Clustering Report
 	if args.reference:
 		ref, classes = read_labels(args.reference)
-		pred = model.predict(data.to(device))
+		pred = model.predict(data)
 		cluster_report(ref, pred, classes)
 							 
 	outdir = args.outdir
 	if not args.no_results:
-		save_results(model, data, data_params, args.outdir, device)
+		save_results(model, data, data_params, args.outdir)
 	

@@ -12,7 +12,6 @@ from distutils.core import setup
 
 install_requires = [
 	'torch>=0.4.0',
-	'vsidom>=0.1.6.5',
 	'scikit-learn>=0.19.1',
 	'pandas>=0.22.0',
 	'numpy>=1.14.2',
@@ -23,8 +22,9 @@ setup(name='SCALE',
 	  version='0.8',
 	  description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
 	  author='Xiong Lei',
-	  author_email='',
-	  url='',
+	  author_email='jsxlei@gmail.com',
+	  url='https://github.com/jsxlei/SCALE/',
+	  install_requires=install_requires,
 	  packages=['scale', ],
 	  scripts=['scripts/SCALE','scripts/chromVAR'],
 	 )

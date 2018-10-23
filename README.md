@@ -9,6 +9,7 @@ To clone the repository and install manually, run the following from a terminal:
 
     git clone git://github.com/jsxlei/SCALE.git
     cd SCALE
+	pip install -r requirements.txt
     python setup.py install --user
 
 ### Usage
