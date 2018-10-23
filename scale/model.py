@@ -153,7 +153,7 @@ class VAE(nn.Module):
 	
 class SCALE(VAE):
 	def __init__(self, dims, n_centroids, device='cpu'):
-		super().__init__(dims, device)
+		super(SCALE, self).__init__(dims, device)
 		self.beta = DeterministicWarmup(n=100, t_max=1)
 		self.n_centroids = n_centroids
 		z_dim = dims[1]
