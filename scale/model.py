@@ -23,7 +23,7 @@ from .loss import elbo, elbo_SCALE
 		
 
 class VAE(nn.Module):
-	def __init__(self, dims, bn=False, dropout=0, binary=True):
+	def __init__(self, dims, device='cpu', bn=False, dropout=0, binary=True):
 		"""
 		Variational Autoencoder [Kingma 2013] model
 		consisting of an encoder/decoder pair for which
@@ -34,6 +34,7 @@ class VAE(nn.Module):
 		"""
 		super(VAE, self).__init__()
 		[x_dim, z_dim, encode_dim, decode_dim] = dims
+		self.device = device
 		self.binary = binary
 		if binary:
 			decode_activation = nn.Sigmoid()
@@ -69,7 +70,6 @@ class VAE(nn.Module):
 
 		return recon_x
 	
-	
 	def loss_function(self, x):
 		z, mu, logvar = self.encoder(x)
 		recon_x = self.decoder(z)
@@ -78,10 +78,37 @@ class VAE(nn.Module):
 		self.kld = kld
 		return -(likelihood - kld) 
 	
-	def get_feature(self, x):
-		# self.eval()
-		z = self.encoder(x)[0].detach().data.cpu().numpy()
-		return z
+	def get_feature(self, data):
+		"""
+		obtain latent features from torch tensor data
+		"""
+		return self.encoder(data)[0].detach().data.cpu().numpy()
+	
+	def get_imputed_data(self, data):
+		"""
+		obtain imputed data from torch tensor data
+		"""
+		return self.forward(data).data.cpu().numpy()
+	
+	def predict(self, data):
+		"""
+		Predict assignments applying k-means on latent feature
+			
+		Input: 
+			x, data matrix
+		Return:
+			predicted cluster assignments
+		"""
+		self.eval()
+		feature = self.get_feature(data)
+		from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
+		kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
+		try:
+			pred = kmeans.fit_predict(feature); 
+		except:
+			print('Predict random')
+			pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
+		return pred
 
 	def load_model(self, path):
 		pretrained_dict = torch.load(path, map_location=lambda storage, loc: storage)
@@ -95,10 +122,13 @@ class VAE(nn.Module):
 		lr=0.002, 
 		weight_decay=5e-4,
 		print_interval=10, 
-		device='cpu',
+		device=None,
 		verbose=True,
-		visdom=None,
 	   ):
+		if device is None:
+			device = self.device
+		else:
+			device = device
 
 		optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay) 
 		for epoch in range(epochs):
@@ -116,16 +146,14 @@ class VAE(nn.Module):
 
 			# Display Training Process
 			if (epoch+1) % print_interval == 0:
-				if visdom is not None:
-					visdom.plot('_loss', 'loss', epoch, epoch_loss/len(dataloader))
 				if verbose:
 					print('[Epoch {:3d}] Loss: {:.3f} lr: {:.4f}'.format(epoch+1, epoch_loss/len(dataloader), epoch_lr))
 
 		
 	
 class SCALE(VAE):
-	def __init__(self, dims, n_centroids):
-		super().__init__(dims)
+	def __init__(self, dims, n_centroids, device='cpu'):
+		super().__init__(dims, device)
 		self.beta = DeterministicWarmup(n=100, t_max=1)
 		self.n_centroids = n_centroids
 		z_dim = dims[1]
@@ -166,35 +194,12 @@ class SCALE(VAE):
 		gamma = p_c_z / torch.sum(p_c_z, dim=1, keepdim=True)
 
 		return gamma, mu_c, var_c, pi
-	
-	def predict(self, x):
-		"""
-		Inference cluster assginments from x
-			
-		Input: 
-			x, data matrix
-		Return:
-			predicted cluster assignments
-		"""
-		
-		from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
-		self.eval()
-
-		kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
-		feature = self.get_feature(x)
-		try:
-			pred = kmeans.fit_predict(feature); 
-		except:
-			pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
-
-		return pred
 		
 	def init_gmm_params(self, data):
 		"""
 		Init SCALE model with GMM model parameters
 		"""
 		z = self.get_feature(data)
-		# z = self.encoder(data)[0].detach().data.cpu().numpy()
 		gmm = GaussianMixture(n_components=self.n_centroids, covariance_type='diag')
 		gmm.fit(z)
 		self.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))

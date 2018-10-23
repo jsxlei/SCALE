@@ -15,10 +15,8 @@ import os
 import torch
 from torch.utils.data import Dataset, TensorDataset, DataLoader
 from sklearn.metrics import f1_score
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder, scale
-from sklearn.metrics import classification_report, silhouette_score, confusion_matrix, adjusted_rand_score
-
-
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.metrics import classification_report, confusion_matrix, adjusted_rand_score
 
 # ============== Data Processing ==============
 # =============================================
@@ -42,10 +40,8 @@ def get_loader(data_file, input_dim=None, sep='\t',
 	if log_transform:
 		data = np.log2(data+1);print('* Log Transform *')
 	data = data.T
-	# print('data shape: {}'.format(data.shape))
 
 	input_dim = input_dim if input_dim else data.shape[1]
-	# if input_dim != data.shape[1]:
 	data = sort_by_mad(data).iloc[:,:input_dim]
 	index = data.columns.values
 
@@ -54,6 +50,7 @@ def get_loader(data_file, input_dim=None, sep='\t',
 		data = norm.fit_transform(data)
 
 	data = torch.Tensor(data)
+	#return [TensorDataset(data), index, raw_index, columns, norm]
 	dataloader = DataLoader(TensorDataset(data), batch_size, shuffle=True, num_workers=4)
 
 	return dataloader, data, index, raw_index, columns, norm	
@@ -94,7 +91,6 @@ def gene_filter_(data, X=6):
 		data is an array of shape (p,n)
 	"""
 	total_cells = data.shape[1]
-	#if format in ['RPKM', 'FPKM', 'CPM', 'TPM', 'READS', 'UMI']:
 	count_1 = data[data > 2].count(axis=1)
 	count_2 = data[data > 0].count(axis=1)
 
@@ -102,9 +98,6 @@ def gene_filter_(data, X=6):
 	genelist_2 = count_2[count_2 < 0.01*(100-X) * total_cells].index
 	genelist = set(genelist_1) & set(genelist_2)
 	data = data.loc[genelist]
-	# data = np.log2(data+1).T
-
-	# print(data.shape)
 	return data
 
 
@@ -180,15 +173,19 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
 		specific_peaks.append(weight_index[index])
 	return specific_peaks
 
-def save_results(model, data, data_params, outdir, device='cpu'):
+def save_results(model, data, data_params, outdir):
+	
 	peak_dir = os.path.join(outdir, 'specific_peaks')
 	if not os.path.exists(outdir):
 		os.makedirs(outdir)
+	if not os.path.exists(peak_dir):
 		os.makedirs(peak_dir)
-		
-	model.to(device)
-	data = data.to(device)
+	
+	model.eval()
+	torch.save(model.state_dict(), os.path.join(outdir, 'model.pt')) # save model file
+	
 	weight_index, raw_index, columns, norm = data_params
+	
 	### output ###
 	# 1. latent GMM feature
 	feature = model.get_feature(data)
@@ -198,21 +195,19 @@ def save_results(model, data, data_params, outdir, device='cpu'):
 	
 	# 3. imputed data
 	recon_x = model(data).data.cpu().numpy()
+	# recon_x = model.get_imputed_data(data)
 	recon_x = norm.inverse_transform(recon_x)
 	
 	# 4. cell type specific peaks
 	weight = model.state_dict()['decoder.reconstruction.weight'].cpu().numpy()
 	specific_peaks = peak_selection(weight, weight_index, kind='both', cutoff=2.5)
 	
-	
-	torch.save(model.state_dict(), os.path.join(outdir, 'model.pt'))
 	assign_file = os.path.join(outdir, 'cluster_assignments.txt')
 	feature_file = os.path.join(outdir, 'feature.txt')
 	impute_file = os.path.join(outdir, 'imputed_data.txt')
 
 	pd.Series(pred).to_csv(assign_file, sep='\t', header=False) # save cluster assignments
 	pd.DataFrame(feature).to_csv(feature_file, sep='\t', header=False) # save latent feature
-	# open(index_file, 'w').write('\n'.join(map(str,weight_index)))
 	pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
 
 	# save specific peaks
@@ -270,6 +265,7 @@ def cluster_report(ref, pred, classes):
 	print(classification_report(ref, pred, target_names=classes))
 	ari_score = adjusted_rand_score(ref, pred)
 	print("\nAdjusted Rand score : {:.4f}".format(ari_score))
+	
 
 
 
