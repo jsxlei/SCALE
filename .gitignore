@@ -1,6 +1,6 @@
 scale/*.pyc
 *.pyc
-scale/.ipynb_checkpoints
-scripts/.ipynb_checkpoints
+*/.ipynb_checkpoints
 scale/__pycache__
-data
+output/
+build/

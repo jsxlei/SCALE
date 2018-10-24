@@ -106,7 +106,6 @@ class VAE(nn.Module):
 		try:
 			pred = kmeans.fit_predict(feature); 
 		except:
-			print('Predict random')
 			pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
 		return pred
 
@@ -170,7 +169,7 @@ class SCALE(VAE):
 		likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
 		self.likelihood = likelihood
 		self.kld = kld
-		# return -(likelihood - kld)
+		
 		return -(likelihood - next(self.beta)*kld) 
 		
 	def get_gamma(self, z):
