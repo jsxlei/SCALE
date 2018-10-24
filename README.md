@@ -8,6 +8,7 @@ Running SCALE on CUDA is recommended if available, make sure Pytorch is correctl
 
 	import torch
 	print(torch.cuda.is_available())
+	
 	True
 Currently SCALE currently requires Python 3 and does not work with Python 2.7
 
