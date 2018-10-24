@@ -20,6 +20,14 @@ The following code runs SCALE on test data located in the SCALE repository.
 
 	SCALE -d data/data.txt -k 6
 	
+Results will be saved in the output folder including:
+	model.pt
+	feature.txt
+	cluster_assignments.txt
+	imputed_data.txt
+	specific_peaks/
+		peak_index*.txt
+	
 Look for more usage of SCALE
 
 	SCALE --help 
