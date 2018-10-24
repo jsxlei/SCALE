@@ -60,6 +60,7 @@ https://github.com/jsxlei/SCALE/tree/master/notebooks/tutorial.ipynb
 
 ### Documentation
 
+* [Preprocessing](docs/preprocessing.md)
 * [Model introduction](docs/model_introduction.md)
 * [Inputs and Outputs](docs/inputs_and_outputs.md)
 * [Feature embedding](docs/feature_embedding.md)
