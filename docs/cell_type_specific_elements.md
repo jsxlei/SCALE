@@ -16,10 +16,13 @@
                  cax_title='Feature value',
                  row_cluster=False, legend_font=6, 
                  col_cluster=False, center=0)
+![feature_heatmap](png/feature_heatmap.png)  
+               
                  
 ## feature specifity
 
     feature_specifity(feature, ref, classes)
+![feature_specifity](png/feature_specifity.png)
     
 ## cell type specific peaks
     
@@ -38,6 +41,7 @@
                      show_cax = True,
                      bbox_to_anchor=(0.4, 1.32),
                     )
+![cell_type_specific_peaks](png/cell_type_specific_peaks.png)
                     
                  
 
