@@ -20,7 +20,6 @@ setup(name='SCALE',
 	  author='Xiong Lei',
 	  author_email='jsxlei@gmail.com',
 	  url='https://github.com/jsxlei/SCALE/',
-	  install_requires=install_requires,
 	  packages=['scale', ],
 	  scripts=['scripts/SCALE','scripts/chromVAR'],
 	 )
