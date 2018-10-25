@@ -5,7 +5,8 @@
     from scale.utils import read_labels
     
     feature = pd.read_csv('../output/feature.txt', sep='\t', index_col=0, header=None)
-    ref, classes = read_labels('../data/labels.txt') # or predicted cluster assignments 
+    ref, classes = read_labels('../data/labels.txt') # or predicted cluster assignments
+    imputed_data = pd.read_csv('../output/imputed_data.txt', sep='\t', index_col=0)
     
 ## feature heatmap
 plot latent feature heatmap
@@ -29,6 +30,7 @@ colorbar is -log10(Pvalues)
 ## cell type specific peaks
 feature has 10 components(dimensions), each components has its most correlation peaks
     
+    specific_peak_dir = '../output/specific_peaks/'
     for i in range(feature.shape[1])[-2:]: # show the represented peaks of last two components of feature
         peak_file = specific_peak_dir+'peak_index{}.txt'.format(i)
         peak_index = open(peak_file).read().split()
