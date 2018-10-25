@@ -1,4 +1,4 @@
-epochs=1000
+epochs=300
 batch_size=16
 latent=10
 lr=0.002

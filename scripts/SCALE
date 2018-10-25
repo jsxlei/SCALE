@@ -52,7 +52,7 @@ if __name__ == '__main__':
 	seed = args.seed
 	np.random.seed(seed)
 	torch.manual_seed(seed)
-	if torch.cuda.is_available:
+	if torch.cuda.is_available():
 		torch.cuda.manual_seed_all(seed)
 
 	args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu" 
