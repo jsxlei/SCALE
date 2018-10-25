@@ -16,4 +16,4 @@ Visualizate each cell as 2-dim scatter point of latent feature vis t-SNE colored
     plot_embedding(feature, ref, classes, markersize=10, figsize=(4,4))
     
     
-![feature embedding](feature_embedding.png)
+![feature embedding](png/feature_embedding.png)
