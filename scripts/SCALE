@@ -23,7 +23,7 @@ import pandas as pd
 import argparse
 
 from scale import SCALE
-from scale.utils import *
+from scale.utils import read_labels, get_loader
 from scale import config
 		
 	
@@ -98,7 +98,6 @@ if __name__ == '__main__':
 		print('\n## Training Model ##')
 		t0 = time.time()
 		model.init_gmm_params(data)
-		#model.init_gmm_params(dataloader)
 		model.fit(dataloader,
 				  lr=config.lr, 
 				  weight_decay=config.weight_decay, 

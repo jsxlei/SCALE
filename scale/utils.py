@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import os
 import torch
-from torch.utils.data import Dataset, TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.metrics import classification_report, confusion_matrix, adjusted_rand_score
@@ -31,7 +31,6 @@ def get_loader(data_file, input_dim=None, sep='\t',
 	Return:
 		dataloader, data, data index, raw data index, columns, and normalizer
 	"""
-	# data = pd.read_csv(data_file, index_col=0, sep='\t').iloc[:,:input_dim]
 	data = pd.read_csv(data_file, index_col=0, sep=sep)
 	raw_index = data.index
 	columns = data.columns
@@ -50,8 +49,7 @@ def get_loader(data_file, input_dim=None, sep='\t',
 		data = norm.fit_transform(data)
 
 	data = torch.Tensor(data)
-	#return [TensorDataset(data), index, raw_index, columns, norm]
-	dataloader = DataLoader(TensorDataset(data), batch_size, shuffle=True, num_workers=4)
+	dataloader = DataLoader(TensorDataset(data), batch_size, shuffle=True, num_workers=1)
 
 	return dataloader, data, index, raw_index, columns, norm	
 
@@ -118,7 +116,6 @@ def cell_filter(data):
 def sample_filter(data, x=10, n_reads=2):
 	data = peak_filter(data, x, n_reads)
 	data = cell_filter(data)
-	print(data.shape)
 	return data
 
 
