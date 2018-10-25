@@ -54,7 +54,8 @@ Apply [chromVAR](https://github.com/GreenleafLab/chromVAR) on specific peaks
 We offer an Rscript ["chromVAR"](../scripts/chromVAR) in the scripts folder which can be run directly by:
 
     e.g. chromVAR -i input_dir --peakfile peak_file -o output_dir
-    ! chromVAR -i ../output/specific_peaks/ --peakfile ../data/peaks.txt -o ../output/chromVAR
+    ! chromVAR -i ../output/ --peakfile ../data/peaks.txt -o ../output/chromVAR
+Input dir is output dir of SCALE including imputed_data.txt and specific_peaks dir
     
     
 Plot deviations heatmap of chromVAR
