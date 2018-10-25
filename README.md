@@ -33,7 +33,7 @@ The following code runs SCALE on test data located in the SCALE repository.
 
 or check clustering results with ground truth labels and save results in a specific folder
 
-	SCALE -d data/data.txt -k 6 -r data/labels.txt -o output/
+	SCALE -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/
 	
 Results will be saved in the output folder including:
 * model.pt
