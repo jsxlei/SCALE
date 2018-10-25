@@ -10,10 +10,10 @@
 Variances ratio of the first two components of PCA
 
     plot_embedding(imputed_data.T, ref, classes, markersize=10, figsize=(4,4), method='PCA')
-! [PCA ratio](PCA_embedding.png)
+![PCA ratio](pca_embedding.png)
 
 ## Cell-to-cell correlations
 Cell-to-cell correlations matrix heatmap
 
     corr_heatmap(imputed_data, ref, classes, figsize=(5,5))
-! [corr_heatmap](corr_heatmap.png)
+![corr_heatmap](corr_heatmap.png)
