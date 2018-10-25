@@ -10,4 +10,4 @@ Compare cluster assignments with ground truth labels.txt
     
     cm = confusion_matrix(assignments, ref)
     plot_confusion_matrix(cm, classes, assign_classes, title='', normalize=False, figsize=(3,3), show_cbar=True)
-![confusion_matrix](confusion_matrix.png)
+![confusion_matrix](png/confusion_matrix.png)
