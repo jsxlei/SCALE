@@ -20,7 +20,7 @@ To clone the repository and install manually, run the following from a terminal:
 
     git clone git://github.com/jsxlei/SCALE.git
     cd SCALE
-	pip install -r requirements.txt
+    pip install -r requirements.txt
     python setup.py install --user
 
 ### Usage
@@ -36,12 +36,12 @@ or check clustering results with ground truth labels and save results in a speci
 	SCALE -d data/data.txt -k 6 -r data/labels.txt -o output/
 	
 Results will be saved in the output folder including:
-	model.pt
-	feature.txt
-	cluster_assignments.txt
-	imputed_data.txt
-	specific_peaks/
-		peak_index*.txt
+* model.pt
+* feature.txt
+* cluster_assignments.txt
+* imputed_data.txt
+* specific_peaks/
+  - peak_index*.txt
 	
 Look for more usage of SCALE
 
