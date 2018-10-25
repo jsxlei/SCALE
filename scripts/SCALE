@@ -103,7 +103,8 @@ if __name__ == '__main__':
 				  lr=config.lr, 
 				  weight_decay=config.weight_decay, 
 			      epochs=epochs, 
-				  verbose=args.verbose
+				  verbose=args.verbose,
+				  print_interval=config.print_interval
 				   )
 		print('\nRunning Time: {:.2f} s'.format(time.time()-t0))
 	else:
