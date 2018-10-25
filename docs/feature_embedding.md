@@ -15,4 +15,4 @@
     plot_embedding(feature, ref, classes, markersize=10, figsize=(4,4))
     
     
-![feature embedding](http://url/to/img.png)
+![feature embedding](feature_embedding.png)
