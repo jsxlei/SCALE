@@ -39,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--reference', '-r', type=str, default='', help='Whether ground truth available')
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
     parser.add_argument('--epochs', '-e', type=int, default=None, help='Training epochs')
-    parser.add_argument('--device', default='cuda:0', help='Use gpu when training')
+    parser.add_argument('--device', default='cuda', help='Use gpu when training')
     parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
     parser.add_argument('--input_dim', type=int, default=None, help='Force input dim')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
