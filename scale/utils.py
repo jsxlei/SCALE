@@ -170,6 +170,23 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
         specific_peaks.append(weight_index[index])
     return specific_peaks
 
+def concat_specific_peak(data, specific_peak_dir, feats=range(1,11)):
+    """
+    Concatenate all specific peaks
+    """
+    concat_X = []
+    concat_y = []
+    for i, feat in enumerate(feats):
+        peak_file = specific_peak_dir + 'peak_index{}.txt'.format(feat-1)
+        peak_index = open(peak_file).read().split()
+        peak_data = data.loc[peak_index]
+        concat_X.append(peak_data)
+        concat_y.append([i]*len(peak_index))
+    concat_peak = pd.concat(concat_X).T
+    feat_labels = np.concatenate(concat_y)
+    return concat_peak, feat_labels
+
+
 def save_results(model, data, data_params, outdir):
 
     peak_dir = os.path.join(outdir, 'specific_peaks')
@@ -191,7 +208,6 @@ def save_results(model, data, data_params, outdir):
     pred = model.predict(data)
 
     # 3. imputed data
-    # recon_x = model(data).data.cpu().numpy()
     recon_x = model.get_imputed_data(data)
     recon_x = norm.inverse_transform(recon_x)
 

@@ -189,7 +189,15 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
         plt.show()
 
 
-def corr_heatmap(X, ref, classes, save=None, show_legend=True, show_cbar=True, figsize=(5,5), **kw):
+def corr_heatmap(X, ref, classes, 
+        save=None,
+        cmap='RdBu_r',
+        show_legend=True, 
+        show_cbar=True, 
+        figsize=(5,5), 
+        ncol=3, 
+        ticks=None, 
+        **kw):
     """
     Plot cell-to-cell correlation matrix heatmap
     """
@@ -207,9 +215,10 @@ def corr_heatmap(X, ref, classes, save=None, show_legend=True, show_cbar=True, f
     bbox_to_anchor = (0.4, 1.2)
     legend_TN = [mpatches.Patch(color=c, label=l) for c,l in zip(colors, classes)]
 
-    cbar_kws={"orientation": "horizontal", "ticks":[0, 0.5, 1]}
-    grid = sns.clustermap(corr, cmap='RdBu_r', 
+    cbar_kws={"orientation": "horizontal", "ticks":ticks}
+    grid = sns.clustermap(corr, cmap=cmap, 
                           col_colors=col_colors, 
+                          figsize=figsize,
                           row_cluster=False,
                           col_cluster=False,
                           cbar_kws=cbar_kws, 
@@ -226,7 +235,7 @@ def corr_heatmap(X, ref, classes, save=None, show_legend=True, show_cbar=True, f
                            handles=legend_TN, 
                            fontsize=6, 
                            frameon=False, 
-                           ncol=3)
+                           ncol=ncol)
     if show_cbar:
         grid.cax.set_position((0.8, 0.76, .1, .02)) 
         grid.cax.tick_params(length=1, labelsize=4, rotation=0)
@@ -240,7 +249,7 @@ def corr_heatmap(X, ref, classes, save=None, show_legend=True, show_cbar=True, f
         plt.show()
 
 
-def feature_specifity(feature, ref, classes):
+def feature_specifity(feature, ref, classes, figsize=(6,6)):
     """
     Calculate the feature specifity:
 
@@ -260,16 +269,18 @@ def feature_specifity(feature, ref, classes):
             pvalue = f_oneway(a,b)[1]
             pvalue_mat[feat, cluster] = pvalue
 
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=figsize)
     grid = sns.heatmap(-np.log10(pvalue_mat), cmap='RdBu_r', 
                        vmax=20,
                        yticklabels=np.arange(10)+1, 
-                       xticklabels=classes[:n_cluster])
+                       xticklabels=classes[:n_cluster],
+                       )
     grid.set_ylabel('Feature', fontsize=18)
     grid.set_xticklabels(labels=classes[:n_cluster], rotation=45, fontsize=18)
     grid.set_yticklabels(labels=np.arange(dim)+1, fontsize=16)
 #     grid.set_title(dataset, fontsize=18)
     cbar = grid.collections[0].colorbar
     cbar.set_label('-log10 (Pvalue)', fontsize=18) #, rotation=0, x=-0.9, y=0)
+
 
 

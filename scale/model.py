@@ -82,7 +82,6 @@ class VAE(nn.Module):
         """
         obtain latent features from torch tensor data
         """
-        # return self.encoder(data)[0].detach().data.cpu().numpy()
         return self.encoder(data)[0].cpu().detach().numpy()
 
     def get_imputed_data(self, data):
