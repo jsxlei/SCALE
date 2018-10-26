@@ -133,7 +133,7 @@ def plot_heatmap(X, y, classes,
         plt.show()
 
 
-def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, save=None, name='', legend=True):
+def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, save=None, name='', show_legend=True):
     """
     Visualize TSNE embedding with labels
 
@@ -176,7 +176,7 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
     plt.figure(figsize=figsize)
     for i,c in enumerate(classes):
         plt.scatter(X[y==i,0], X[y==i,1], s=markersize, color=colors[i], label=c)
-    if legend:
+    if show_legend:
         plt.legend(loc=9, bbox_to_anchor=(0.5,1.2), fontsize=10, ncol=3, frameon=False, markerscale=2.5)
     plt.gca().spines['top'].set_visible(False)
     plt.gca().spines['right'].set_visible(False)
@@ -189,7 +189,7 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
         plt.show()
 
 
-def corr_heatmap(X, ref, classes, save=None, **kw):
+def corr_heatmap(X, ref, classes, save=None, show_legend=True, show_cbar=True, figsize=(5,5), **kw):
     """
     Plot cell-to-cell correlation matrix heatmap
     """
@@ -209,7 +209,6 @@ def corr_heatmap(X, ref, classes, save=None, **kw):
 
     cbar_kws={"orientation": "horizontal", "ticks":[0, 0.5, 1]}
     grid = sns.clustermap(corr, cmap='RdBu_r', 
-#                           row_colors=row_colors, 
                           col_colors=col_colors, 
                           row_cluster=False,
                           col_cluster=False,
@@ -220,17 +219,20 @@ def corr_heatmap(X, ref, classes, save=None, **kw):
     grid.ax_heatmap.set_yticklabels('')
     grid.ax_heatmap.tick_params(axis='x', length=0)
     grid.ax_heatmap.tick_params(axis='y', length=0)
-    grid.ax_heatmap.legend(loc='upper center', 
+
+    if show_legend:
+        grid.ax_heatmap.legend(loc='upper center', 
                            bbox_to_anchor=bbox_to_anchor, 
                            handles=legend_TN, 
                            fontsize=6, 
                            frameon=False, 
                            ncol=3)
-
-    grid.cax.set_position((0.8, 0.76, .1, .02)) 
-    # grid.cax.set_position((0.95, 0.3, .02, .1)) 
-    grid.cax.tick_params(length=1, labelsize=4, rotation=0)
-    grid.cax.set_title('Pearson', fontsize=6, y=0.8)
+    if show_cbar:
+        grid.cax.set_position((0.8, 0.76, .1, .02)) 
+        grid.cax.tick_params(length=1, labelsize=4, rotation=0)
+        grid.cax.set_title('Pearson', fontsize=6, y=0.8)
+    else:
+        grid.cax.set_visible(False)
 
     if save:
         plt.savefig(save, format='pdf')
