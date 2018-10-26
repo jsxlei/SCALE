@@ -11,12 +11,12 @@ library(optparse)
 
 option_list = list(
     make_option(c("-i", "--inputdir"), type="character"),
-	make_option(c("--peakfile"), type='character'),
+    make_option(c("--peakfile"), type='character'),
     make_option(c("-o", "--outdir"), type='character', default=''),
-	make_option(c("--dim"), type="integer", default=10),
-	make_option(c("--process"), type='logical', default=FALSE)
+    make_option(c("--dim"), type="integer", default=10),
+    make_option(c("--process"), type='logical', default=FALSE)
 ); 
- 
+
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
@@ -35,13 +35,13 @@ apply_chromVAR=function(frag_counts, frag_peaks, assignments){
 }
 
 get_feat_dev=function(sub_counts, sub_peaks, name){
-	if (opt$process){
-		out = process(sub_counts, sub_peaks)
-		sub_counts = out[[1]];
-		sub_peaks = out[[2]];
-	}
-	
-	print(dim(sub_counts))
+    if (opt$process){
+        out = process(sub_counts, sub_peaks)
+        sub_counts = out[[1]];
+        sub_peaks = out[[2]];
+    }
+
+    print(dim(sub_counts))
     devTopPeaks = apply_chromVAR(sub_counts, sub_peaks, assignments)
     variabilityTopPeaks = computeVariability(devTopPeaks)
     devTopPeaks.scores = deviationScores(devTopPeaks)
@@ -62,9 +62,9 @@ process = function(frag_counts, sub_peaks, cutoff=800){
 
 inputdir = opt$inputdir
 if(opt$outdir!=''){
-	outdir = opt$outdir
+    outdir = opt$outdir
 }else{
-	outdir = paste0(inputdir, '/chromVAR/')
+    outdir = paste0(inputdir, '/chromVAR/')
 }
 dir.create(outdir, recursive=TRUE, showWarnings=FALSE)
 
@@ -84,7 +84,7 @@ get_feat_dev(sub_counts, sub_peaks, '')
 
 for (i in seq(0,opt$dim-1)){
     peak_index = read.table(paste0(peak_dir, 'peak_index', i,'.txt'))$V1
-	index = row.names(fragment_counts)%in%peak_index
+    index = row.names(fragment_counts)%in%peak_index
     sub_counts = fragment_counts[index,]
     sub_peaks = peaks[index]
     get_feat_dev(sub_counts, sub_peaks, i)

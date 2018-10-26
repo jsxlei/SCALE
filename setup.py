@@ -15,11 +15,11 @@ if sys.version_info[:2] < (3,6):
     raise RuntimeError("Python version >=3.6 required.")
 
 setup(name='SCALE',
-	  version='0.9',
-	  description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
-	  author='Xiong Lei',
-	  author_email='jsxlei@gmail.com',
-	  url='https://github.com/jsxlei/SCALE/',
-	  packages=['scale', ],
-	  scripts=['scripts/SCALE','scripts/chromVAR'],
-	 )
+      version='0.9',
+      description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
+      author='Xiong Lei',
+      author_email='jsxlei@gmail.com',
+      url='https://github.com/jsxlei/SCALE/',
+      packages=['scale', ],
+      scripts=['scripts/SCALE','scripts/chromVAR'],
+     )
