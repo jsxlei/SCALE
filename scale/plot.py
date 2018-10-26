@@ -150,8 +150,8 @@ def plot_embedding(X, y, classes, method='TSNE', figsize=(4,4), markersize=10, s
 			pca = PCA(n_components=2, random_state=124)
 			X = pca.fit_transform(X)
 			ratio = pca.explained_variance_ratio_
-			x_label = 'PCA dim1 {:.2%}'.format(ratio[0])
-			y_label = 'PCA dim2 {:.2%}'.format(ratio[1])
+			x_label = 'PCA dim1 ratio: {:.2%}'.format(ratio[0])
+			y_label = 'PCA dim2 ratio: {:.2%}'.format(ratio[1])
 		elif method == 'TSNE':
 			X = TSNE(n_components=2, random_state=124).fit_transform(X)
 			x_label = 'tSNE dim 1'
@@ -236,8 +236,8 @@ def corr_heatmap(X, ref, classes, save=None, **kw):
 		plt.savefig(save, format='pdf')
 	else:
 		plt.show()
-		
-		
+
+
 def feature_specifity(feature, ref, classes):
 	"""
 	Calculate the feature specifity:

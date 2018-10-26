@@ -20,7 +20,7 @@ from sklearn.mixture import GaussianMixture
 
 from .layer import Encoder, Decoder, build_mlp, DeterministicWarmup
 from .loss import elbo, elbo_SCALE
-		
+
 
 class VAE(nn.Module):
 	def __init__(self, dims, device='cpu', bn=False, dropout=0, binary=True):
@@ -40,12 +40,12 @@ class VAE(nn.Module):
 			decode_activation = nn.Sigmoid()
 		else:
 			decode_activation = None
-		
+
 		self.encoder = Encoder([x_dim, encode_dim, z_dim], bn=bn, dropout=dropout)
 		self.decoder = Decoder([z_dim, decode_dim, x_dim], bn=bn, dropout=dropout, output_activation=decode_activation)
-		
+
 		self.reset_parameters()
-		
+
 	def reset_parameters(self):
 		"""
 		Initialize weights
@@ -55,7 +55,7 @@ class VAE(nn.Module):
 				init.xavier_normal_(m.weight.data)
 				if m.bias is not None:
 					m.bias.data.zero_()
-	
+
 	def forward(self, x, y=None):
 		"""
 		Runs a data point through the model in order
@@ -69,7 +69,7 @@ class VAE(nn.Module):
 		recon_x = self.decoder(z)
 
 		return recon_x
-	
+
 	def loss_function(self, x):
 		z, mu, logvar = self.encoder(x)
 		recon_x = self.decoder(z)
@@ -77,23 +77,24 @@ class VAE(nn.Module):
 		self.likelihood = likelihood
 		self.kld = kld
 		return -(likelihood - kld) 
-	
+
 	def get_feature(self, data):
 		"""
 		obtain latent features from torch tensor data
 		"""
-		return self.encoder(data)[0].detach().data.cpu().numpy()
-	
+		# return self.encoder(data)[0].detach().data.cpu().numpy()
+		return self.encoder(data)[0].cpu().detach().numpy()
+
 	def get_imputed_data(self, data):
 		"""
 		obtain imputed data from torch tensor data
 		"""
-		return self.forward(data).data.cpu().numpy()
-	
+		return self.forward(data).cpu().detach().numpy()
+
 	def predict(self, data):
 		"""
 		Predict assignments applying k-means on latent feature
-			
+
 		Input: 
 			x, data matrix
 		Return:
@@ -115,7 +116,7 @@ class VAE(nn.Module):
 		pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
 		model_dict.update(pretrained_dict) 
 		self.load_state_dict(model_dict)
-		
+
 	def fit(self, dataloader,
 		epochs=300,
 		lr=0.002, 
@@ -144,24 +145,24 @@ class VAE(nn.Module):
 			avg_loss = epoch_loss/len(dataloader)
 
 			# Display Training Process
-			if (epoch+1) % print_interval == 0:
+			if (epoch+1) % print_interval == 0 or epoch==0:
 				if verbose:
 					print('[Epoch {:3d}] Loss: {:.3f} lr: {:.4f}'.format(epoch+1, epoch_loss/len(dataloader), epoch_lr))
 
-		
-	
+
+
 class SCALE(VAE):
 	def __init__(self, dims, n_centroids, device='cpu'):
 		super(SCALE, self).__init__(dims, device)
 		self.beta = DeterministicWarmup(n=100, t_max=1)
 		self.n_centroids = n_centroids
 		z_dim = dims[1]
-		
+
 		# init c_params
 		self.pi = nn.Parameter(torch.ones(n_centroids)/n_centroids)  # pc
 		self.mu_c = nn.Parameter(torch.zeros(z_dim, n_centroids)) # mu
 		self.var_c = nn.Parameter(torch.ones(z_dim, n_centroids)) # sigma^2
-		
+
 	def loss_function(self, x):
 		z, mu, logvar = self.encoder(x)
 		recon_x = self.decoder(z)
@@ -169,9 +170,9 @@ class SCALE(VAE):
 		likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
 		self.likelihood = likelihood
 		self.kld = kld
-		
+
 		return -(likelihood - next(self.beta)*kld) 
-		
+
 	def get_gamma(self, z):
 		"""
 		Inference c from z
@@ -181,7 +182,7 @@ class SCALE(VAE):
 		"""
 		pi, mu_c, var_c = self.pi, self.mu_c, self.var_c
 		n_centroids = self.n_centroids
-		
+
 		N = z.size(0)
 		z = z.unsqueeze(2).expand(z.size(0), z.size(1), n_centroids)
 		pi = pi.repeat(N,1) # NxK
@@ -193,7 +194,7 @@ class SCALE(VAE):
 		gamma = p_c_z / torch.sum(p_c_z, dim=1, keepdim=True)
 
 		return gamma, mu_c, var_c, pi
-		
+
 	def init_gmm_params(self, data):
 		"""
 		Init SCALE model with GMM model parameters
@@ -203,12 +204,12 @@ class SCALE(VAE):
 		gmm.fit(z)
 		self.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))
 		self.var_c.data.copy_(torch.from_numpy(gmm.covariances_.T.astype(np.float32)))
-		
-		
-	
+
+
+
 def adjust_learning_rate(init_lr, optimizer, epoch):
 	lr = max(init_lr * (0.9 ** (epoch//10)), 0.0002)
 	for param_group in optimizer.param_groups:
 		param_group["lr"] = lr
 	return lr	
-	
+

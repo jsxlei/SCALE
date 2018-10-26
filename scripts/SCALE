@@ -23,7 +23,7 @@ import pandas as pd
 import argparse
 
 from scale import SCALE
-from scale.utils import read_labels, get_loader
+from scale.utils import read_labels, get_loader, save_results
 from scale import config
 		
 	

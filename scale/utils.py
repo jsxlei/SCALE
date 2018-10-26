@@ -171,34 +171,34 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
 	return specific_peaks
 
 def save_results(model, data, data_params, outdir):
-	
+
 	peak_dir = os.path.join(outdir, 'specific_peaks')
 	if not os.path.exists(outdir):
 		os.makedirs(outdir)
 	if not os.path.exists(peak_dir):
 		os.makedirs(peak_dir)
-	
+
 	model.eval()
 	torch.save(model.state_dict(), os.path.join(outdir, 'model.pt')) # save model file
-	
+
 	weight_index, raw_index, columns, norm = data_params
-	
+
 	### output ###
 	# 1. latent GMM feature
 	feature = model.get_feature(data)
-	
+
 	# 2. cluster assignments
 	pred = model.predict(data)
-	
+
 	# 3. imputed data
-	recon_x = model(data).data.cpu().numpy()
-	# recon_x = model.get_imputed_data(data)
+	# recon_x = model(data).data.cpu().numpy()
+	recon_x = model.get_imputed_data(data)
 	recon_x = norm.inverse_transform(recon_x)
-	
+
 	# 4. cell type specific peaks
 	weight = model.state_dict()['decoder.reconstruction.weight'].cpu().numpy()
 	specific_peaks = peak_selection(weight, weight_index, kind='both', cutoff=2.5)
-	
+
 	assign_file = os.path.join(outdir, 'cluster_assignments.txt')
 	feature_file = os.path.join(outdir, 'feature.txt')
 	impute_file = os.path.join(outdir, 'imputed_data.txt')
@@ -215,7 +215,7 @@ def save_results(model, data, data_params, outdir):
 		all_peaks += list(peaks)
 	peak_file = os.path.join(peak_dir, 'peak_index.txt')
 	open(peak_file, 'w').write('\n'.join(set(all_peaks)))
-	
+
 # ================= Metrics ===================
 # =============================================
 
@@ -262,7 +262,7 @@ def cluster_report(ref, pred, classes):
 	print(classification_report(ref, pred, target_names=classes))
 	ari_score = adjusted_rand_score(ref, pred)
 	print("\nAdjusted Rand score : {:.4f}".format(ari_score))
-	
+
 
 
 
