@@ -23,7 +23,7 @@ import pandas as pd
 import argparse
 
 from scale import SCALE
-from scale.utils import read_labels, get_loader, save_results
+from scale.utils import read_labels, get_loader, save_results, cluster_report
 from scale import config
 
 
@@ -52,8 +52,8 @@ if __name__ == '__main__':
     seed = args.seed
     np.random.seed(seed)
     torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
+    # if torch.cuda.is_available():
+        # torch.cuda.manual_seed_all(seed)
 
     args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu" 
     device = torch.device(args.device)
@@ -90,7 +90,7 @@ if __name__ == '__main__':
         cell_num, input_dim, k, epochs, args.seed, args.device))
     print("============================")
 
-    dims = [input_dim, config.latent, config.encode_dim, []]
+    dims = [input_dim, config.latent, config.encode_dim, config.decode_dim]
     model = SCALE(dims, n_centroids=k, device=device)
     model.to(device)
     data = data.to(device)

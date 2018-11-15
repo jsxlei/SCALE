@@ -69,6 +69,7 @@ def read_labels(ref, return_enc=False):
     else:
         return ref, classes
 
+
 def sort_by_mad(data, axis=0):
     """
     Sort genes by mad to select input features
@@ -170,30 +171,11 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
         specific_peaks.append(weight_index[index])
     return specific_peaks
 
-def concat_specific_peak(data, specific_peak_dir, feats=range(1,11)):
-    """
-    Concatenate all specific peaks
-    """
-    concat_X = []
-    concat_y = []
-    for i, feat in enumerate(feats):
-        peak_file = specific_peak_dir + 'peak_index{}.txt'.format(feat-1)
-        peak_index = open(peak_file).read().split()
-        peak_data = data.loc[peak_index]
-        concat_X.append(peak_data)
-        concat_y.append([i]*len(peak_index))
-    concat_peak = pd.concat(concat_X).T
-    feat_labels = np.concatenate(concat_y)
-    return concat_peak, feat_labels
-
 
 def save_results(model, data, data_params, outdir):
 
-    peak_dir = os.path.join(outdir, 'specific_peaks')
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    if not os.path.exists(peak_dir):
-        os.makedirs(peak_dir)
 
     model.eval()
     torch.save(model.state_dict(), os.path.join(outdir, 'model.pt')) # save model file
@@ -224,20 +206,20 @@ def save_results(model, data, data_params, outdir):
     pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
 
     # save specific peaks
-    all_peaks = []
-    for i, peaks in enumerate(specific_peaks):
-        peak_file = os.path.join(peak_dir, 'peak_index{}.txt'.format(i))
-        open(peak_file, 'w').write('\n'.join(list(peaks)))
-        all_peaks += list(peaks)
-    peak_file = os.path.join(peak_dir, 'peak_index.txt')
-    open(peak_file, 'w').write('\n'.join(set(all_peaks)))
+    # all_peaks = []
+    # for i, peaks in enumerate(specific_peaks):
+        # peak_file = os.path.join(peak_dir, 'peak_index{}.txt'.format(i))
+        # open(peak_file, 'w').write('\n'.join(list(peaks)))
+        # all_peaks += list(peaks)
+    # peak_file = os.path.join(peak_dir, 'peak_index.txt')
+    # open(peak_file, 'w').write('\n'.join(set(all_peaks)))
 
 # ================= Metrics ===================
 # =============================================
 
-def cluster_acc(Y_pred, Y):
+def reassign_cluster_with_ref(Y_pred, Y):
     """
-    Calculate clustering accuracy
+    Reassign cluster to reference labels
     Inputs:
         Y_pred: predict y classes
         Y: true y classes
@@ -246,6 +228,11 @@ def cluster_acc(Y_pred, Y):
         y_pred: reassignment index predict y classes
         indices: classes assignment
     """
+    def reassign_cluster(y_pred, index):
+        y_ = np.zeros_like(y_pred)
+        for i, j in index:
+            y_[np.where(y_pred==i)] = j
+        return y_
     from sklearn.utils.linear_assignment_ import linear_assignment
     assert Y_pred.size == Y.size
     D = max(Y_pred.max(), Y.max())+1
@@ -254,23 +241,14 @@ def cluster_acc(Y_pred, Y):
         w[Y_pred[i], Y[i]] += 1
     ind = linear_assignment(w.max() - w)
 
-    # acc = sum([w[i,j] for i,j in ind])*1.0/Y_pred.size
-    y_ = reassign_cluster(Y_pred, ind)
-    f1 = f1_score(Y, y_, average='micro')
-    return f1, y_
-
-def reassign_cluster(y_pred, index):
-    y_ = np.zeros_like(y_pred)
-    for i, j in index:
-        y_[np.where(y_pred==i)] = j
-    return y_
+    return reassign_cluster(Y_pred, ind)
 
 
 def cluster_report(ref, pred, classes):
     """
     Print Cluster Report
     """
-    f1, pred = cluster_acc(pred, ref)
+    pred = reassign_cluster_with_ref(pred, ref)
     cm = confusion_matrix(ref, pred)
     print('\n## Confusion matrix ##\n')
     print(cm)
@@ -278,6 +256,8 @@ def cluster_report(ref, pred, classes):
     print(classification_report(ref, pred, target_names=classes))
     ari_score = adjusted_rand_score(ref, pred)
     print("\nAdjusted Rand score : {:.4f}".format(ari_score))
+
+
 
 
 

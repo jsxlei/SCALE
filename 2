@@ -29,7 +29,7 @@ def sort_by_classes(X, y, classes):
     return X, y, classes, index
 
 
-def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
+def plot_confusion_matrix(cm, x_classes, y_classes,
                           normalize=False,
                           title='Confusion matrix',
                           cmap=plt.cm.Blues,
@@ -50,7 +50,6 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
     """
     import itertools
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-
 
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -84,7 +83,7 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
         plt.show()
 
 
-def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
+def plot_heatmap(X, y, y_pred=None, classes=None, row_labels=None,
                  cax_title='', xlabel='', ylabel='', yticklabels='', legend_font=10, 
                  show_legend=True, show_cax=True, tick_color='black', ncol=3,
                  bbox_to_anchor=(0.5, 1.3), position=(0.8, 0.78, .1, .04),
@@ -99,10 +98,16 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
     import matplotlib.patches as mpatches  # add legend
     colormap = plt.cm.tab20
 
-    # if classes is not None:
-    X, y, classes, index = sort_by_classes(X, y, classes)
-    # else:
+    # if classes is None:
         # classes = np.unique(y)
+    # index = []
+    # for c in classes:
+        # ind = np.where(y==c)[0]
+        # index.append(ind)
+    # index = np.concatenate(index)
+    # X = X.iloc[:, index]
+    # y = y[index]
+    X, y, classes, index = sort_by_classes(X, y, classes)
 
     if y_pred is not None:
         y_pred = y_pred[index]
@@ -140,8 +145,6 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
                                frameon=False, 
                                ncol=ncol)
         grid.ax_col_colors.tick_params(labelsize=6, length=0, labelcolor='orange')
-    if kw['row_cluster']:
-        yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
 
     grid.ax_heatmap.set_xlabel(xlabel)
     grid.ax_heatmap.set_ylabel(ylabel, fontsize=8)
@@ -167,10 +170,22 @@ def plot_embedding(X, y, classes=None, method='TSNE',
     Params:
         X: nxf array, n is sample number, f is feature
         y: a array of labels for n elements 
-        classes: reorder classes color
+        labels: n_centroids classes
     """
     from sklearn.manifold import TSNE
     from sklearn.decomposition import PCA, FastICA
+
+    # if classes is None:
+        # classes = np.unique(y)
+    # index = []
+    # for c in classes:
+        # ind = np.where(y==c)[0]
+        # index.append(ind)
+    # index = np.concatenate(index)
+    # X = X.iloc[:, index]
+    # y = y[index]
+    X, y, classes, index = sort_by_classes(X, y, classes)
+    X = X.T
 
     if X.shape[1] != 2:
         if method == 'PCA':
@@ -189,14 +204,20 @@ def plot_embedding(X, y, classes=None, method='TSNE',
             x_label = 'ICA dim 1'
             y_label = 'ICA dim 2'
 
-    colormap = plt.cm.tab20
-    if classes is None:
-        classes = np.unique(y)
-    colors = {c:colormap(i) for i,c in enumerate(classes)}
+    n_centroids = max(y)+1
+    assert n_centroids == len(classes), 'Mismatch n_centroids with classes'
+    # fig = plt.figure(figsize=(10,10))
+    if n_centroids > 20:
+        colormap = plt.cm.gist_ncar
+        colors = [colormap(i) for i in np.linspace(0, 0.9, n_centroids)]
+    else:
+        colormap = plt.cm.tab20
+        # n = 20 // n_centroids
+        colors = [colormap(i) for i in range(n_centroids)]
 
     plt.figure(figsize=figsize)
-    for c in classes:
-        plt.scatter(X[y==c,0], X[y==c,1], s=markersize, color=colors[c], label=c)
+    for i,c in enumerate(classes):
+        plt.scatter(X[y==i,0], X[y==i,1], s=markersize, color=colors[i], label=c)
     if show_legend:
         plt.legend(loc=9, bbox_to_anchor=(0.5,1.2), fontsize=10, ncol=3, frameon=False, markerscale=2.5)
     plt.gca().spines['top'].set_visible(False)
@@ -210,7 +231,7 @@ def plot_embedding(X, y, classes=None, method='TSNE',
         plt.show()
 
 
-def corr_heatmap(X, y, classes=None, 
+def corr_heatmap(X, ref, classes, 
         cmap='RdBu_r',
         show_legend=True, 
         show_cbar=True, 
@@ -222,22 +243,19 @@ def corr_heatmap(X, y, classes=None,
     """
     Plot cell-to-cell correlation matrix heatmap
     """
-    if classes is not None:
-        X, y, classes, index = sort_by_classes(X, y, classes)
-    else:
-        classes = np.unique(y)
-    # index = np.argsort(ref)
-    # X = X.iloc[:,index]
-    # ref = ref[index]
+    index = np.argsort(ref)
+    X = X.iloc[:,index]
+    ref = ref[index]
     corr = X.corr()
 
     import matplotlib.patches as mpatches  # add legend
     colormap = plt.cm.tab20
 
-    colors = {c:colormap(i) for i,c in enumerate(classes)}
-    col_colors = [ colors[c] for c in y ]
+    n_centroids = max(ref)+1
+    colors = [colormap(i) for i in range(n_centroids)]
+    row_colors = col_colors = [ colors[i] for i in ref ]
     bbox_to_anchor = (0.4, 1.2)
-    legend_TN = [mpatches.Patch(color=color, label=c) for c,color in colors.items()]
+    legend_TN = [mpatches.Patch(color=c, label=l) for c,l in zip(colors, classes)]
 
     cbar_kws={"orientation": "horizontal", "ticks":ticks}
     grid = sns.clustermap(corr, cmap=cmap, 
@@ -283,16 +301,15 @@ def feature_specifity(feature, ref, classes, figsize=(6,6)):
         classes: cluster classes
     """
     from scipy.stats import f_oneway
-    # n_cluster = max(ref) + 1
-    n_cluster = len(classes)
+    n_cluster = max(ref) + 1
     dim = feature.shape[1] # feature dimension
     pvalue_mat = np.zeros((dim, n_cluster))
-    for i,cluster in enumerate(classes):
+    for cluster in range(n_cluster):
         for feat in range(dim):
             a = feature.iloc[:, feat][ref == cluster]
             b = feature.iloc[:, feat][ref != cluster]
             pvalue = f_oneway(a,b)[1]
-            pvalue_mat[feat, i] = pvalue
+            pvalue_mat[feat, cluster] = pvalue
 
     plt.figure(figsize=figsize)
     grid = sns.heatmap(-np.log10(pvalue_mat), cmap='RdBu_r', 
