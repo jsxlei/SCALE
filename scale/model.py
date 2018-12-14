@@ -103,10 +103,10 @@ class VAE(nn.Module):
         feature = self.get_feature(data)
         from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
         kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
-        try:
-            pred = kmeans.fit_predict(feature); 
-        except:
-            pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
+        # try:
+        pred = kmeans.fit_predict(feature); 
+        # except:
+            # pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
         return pred
 
     def load_model(self, path):

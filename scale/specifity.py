@@ -61,7 +61,7 @@ def mat_specificity_score(mat, labels):
         scores.append(score)
     return pd.concat(scores, axis=1)
 
-def cluster_specific(score_mat, classes=None, top=100):
+def cluster_specific(score_mat, classes=None, top=0):
     """
         Identify top specific peaks for each cluster
         

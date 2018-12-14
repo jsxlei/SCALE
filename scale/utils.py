@@ -32,6 +32,7 @@ def get_loader(data_file, input_dim=None, sep='\t',
         dataloader, data, data index, raw data index, columns, and normalizer
     """
     data = pd.read_csv(data_file, index_col=0, sep=sep)
+    # data[data>2] = 2
     raw_index = data.index
     columns = data.columns
     if gene_filter:
@@ -206,6 +207,9 @@ def save_results(model, data, data_params, outdir):
     pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
 
     # save specific peaks
+    # peak_dir = outdir+'/specific_peaks/'
+    # if not os.path.exists(peak_dir):
+        # os.makedirs(peak_dir)
     # all_peaks = []
     # for i, peaks in enumerate(specific_peaks):
         # peak_file = os.path.join(peak_dir, 'peak_index{}.txt'.format(i))

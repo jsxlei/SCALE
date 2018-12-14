@@ -21,5 +21,5 @@ setup(name='SCALE',
       author_email='jsxlei@gmail.com',
       url='https://github.com/jsxlei/SCALE/',
       packages=['scale', ],
-      scripts=['scripts/SCALE','scripts/chromVAR'],
+      scripts=['SCALE.py'],
      )

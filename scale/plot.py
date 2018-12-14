@@ -31,13 +31,15 @@ def sort_by_classes(X, y, classes):
 
 def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
                           normalize=False,
-                          title='Confusion matrix',
+                          title='',
                           cmap=plt.cm.Blues,
                           figsize=(5,5),
                           mark=True,
                           save=None,
                           rotation=45,
-                          show_cbar=True
+                          show_cbar=True,
+                          show_xticks=True,
+                          show_yticks=True,
                         ):
     """
     This function prints and plots the confusion matrix.
@@ -64,6 +66,17 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
     y_tick_marks = np.arange(len(y_classes))
     plt.xticks(x_tick_marks, x_classes, rotation=rotation, ha='right')
     plt.yticks(y_tick_marks, y_classes)
+    
+    ax=plt.gca()
+    if not show_xticks:
+        ax.axes.get_xaxis().set_ticks([])
+        ax.axes.get_xaxis().set_ticklabels([])
+    if not show_yticks:
+        ax.axes.get_yaxis().set_ticks([])
+        ax.axes.get_yaxis().set_ticklabels([])
+    else:
+        plt.ylabel('Predicted Cluster')
+
 
     fmt = '.2f' if normalize else 'd'
     thresh = cm.max() / 2.
@@ -75,7 +88,6 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
                      color="white" if cm[i, j] > thresh else "black")
 
     plt.tight_layout()
-    plt.ylabel('Predicted Cluster')
     if show_cbar:
         plt.colorbar(shrink=0.8) 
     if save:
@@ -84,10 +96,10 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
         plt.show()
 
 
-def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
+def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None, 
                  cax_title='', xlabel='', ylabel='', yticklabels='', legend_font=10, 
                  show_legend=True, show_cax=True, tick_color='black', ncol=3,
-                 bbox_to_anchor=(0.5, 1.3), position=(0.8, 0.78, .1, .04),
+                 bbox_to_anchor=(0.5, 1.3), position=(0.8, 0.78, .1, .04), return_grid=False,
                  save=None, **kw):
     """
     plot hidden code heatmap with labels
@@ -96,9 +108,8 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
         X: fxn array, n is sample number, f is feature
         y: a array of labels for n elements or a list of array
     """
-    import matplotlib.patches as mpatches  # add legend
-    colormap = plt.cm.tab20
 
+    import matplotlib.patches as mpatches  # add legend
     # if classes is not None:
     X, y, classes, index = sort_by_classes(X, y, classes)
     # else:
@@ -107,12 +118,20 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
     if y_pred is not None:
         y_pred = y_pred[index]
         classes = list(classes) + list(np.unique(y_pred)) 
-        colors = {c:colormap(i) for i, c in enumerate(classes)}
+        if colormap is None:
+            colormap = plt.cm.tab20
+            colors = {c:colormap(i) for i, c in enumerate(classes)}
+        else:
+            colors = {c:colormap[i] for i, c in enumerate(classes)}
         col_colors = []
         col_colors.append([colors[c] for c in y])
         col_colors.append([colors[c] for c in y_pred])
     else:
-        colors = {c:colormap(i) for i, c in enumerate(classes)}
+        if colormap is None:
+            colormap = plt.cm.tab20
+            colors = {c:colormap(i) for i, c in enumerate(classes)}
+        else:
+            colors = {c:colormap[i] for i, c in enumerate(classes)}
         col_colors = [ colors[c] for c in y ]
         
     legend_TN = [mpatches.Patch(color=color, label=c) for c, color in colors.items()]
@@ -140,8 +159,9 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
                                frameon=False, 
                                ncol=ncol)
         grid.ax_col_colors.tick_params(labelsize=6, length=0, labelcolor='orange')
-    if kw['row_cluster']:
-        yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
+    if 'row_cluster' in kw:
+        if (kw['row_cluster']==True) and (yticklabels is not ''):
+            yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
 
     grid.ax_heatmap.set_xlabel(xlabel)
     grid.ax_heatmap.set_ylabel(ylabel, fontsize=8)
@@ -157,9 +177,11 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None,
         plt.savefig(save, format='pdf')
     else:
         plt.show()
+    if return_grid:
+        return grid
 
 
-def plot_embedding(X, y, classes=None, method='TSNE', 
+def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap=None, 
                    figsize=(4,4), markersize=10, save=None, name='', show_legend=True):
     """
     Visualize TSNE embedding with labels
@@ -189,18 +211,29 @@ def plot_embedding(X, y, classes=None, method='TSNE',
             x_label = 'ICA dim 1'
             y_label = 'ICA dim 2'
 
-    colormap = plt.cm.tab20
     if classes is None:
         classes = np.unique(y)
-    colors = {c:colormap(i) for i,c in enumerate(classes)}
-
+    if colormap is None:
+        colormap = plt.cm.tab20
+        colors = {c:colormap(i) for i,c in enumerate(classes)}
+    else:
+        colors = {c:colormap[i] for i,c in enumerate(classes)}
     plt.figure(figsize=figsize)
     for c in classes:
         plt.scatter(X[y==c,0], X[y==c,1], s=markersize, color=colors[c], label=c)
+    default_legend_params = {'loc':9, 
+            'bbox_to_anchor':(0.5,1.2), 
+            'fontsize':10, 
+            'ncol':3, 
+            'frameon':False, 
+            'markerscale':2.5}
+    default_legend_params.update(legend_params)
     if show_legend:
-        plt.legend(loc=9, bbox_to_anchor=(0.5,1.2), fontsize=10, ncol=3, frameon=False, markerscale=2.5)
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
+        plt.legend(**default_legend_params)
+        # plt.legend(loc=9, bbox_to_anchor=(0.5,1.2), fontsize=10, ncol=3, frameon=False, markerscale=2.5)
+    # plt.gca().spines['top'].set_visible(False)
+    # plt.gca().spines['right'].set_visible(False)
+    sns.despine(offset=10, trim=True)
     plt.xlabel(x_label, fontsize=12)
     plt.ylabel(y_label, fontsize=12)
 
@@ -210,7 +243,7 @@ def plot_embedding(X, y, classes=None, method='TSNE',
         plt.show()
 
 
-def corr_heatmap(X, y, classes=None, 
+def corr_heatmap(X, y=None, classes=None, 
         cmap='RdBu_r',
         show_legend=True, 
         show_cbar=True, 
@@ -222,22 +255,27 @@ def corr_heatmap(X, y, classes=None,
     """
     Plot cell-to-cell correlation matrix heatmap
     """
-    if classes is not None:
+    import matplotlib.patches as mpatches  # add legend
+    colormap = plt.cm.tab20
+
+    if y is not None:
+        if classes is None:
+            classes = np.unique(y)
         X, y, classes, index = sort_by_classes(X, y, classes)
+
+        colors = {c:colormap(i) for i,c in enumerate(classes)}
+        col_colors = [ colors[c] for c in y ]
+        bbox_to_anchor = (0.4, 1.2)
+        legend_TN = [mpatches.Patch(color=color, label=c) for c,color in colors.items()]
     else:
-        classes = np.unique(y)
+        col_colors = None
+    # else:
     # index = np.argsort(ref)
     # X = X.iloc[:,index]
     # ref = ref[index]
     corr = X.corr()
 
-    import matplotlib.patches as mpatches  # add legend
-    colormap = plt.cm.tab20
 
-    colors = {c:colormap(i) for i,c in enumerate(classes)}
-    col_colors = [ colors[c] for c in y ]
-    bbox_to_anchor = (0.4, 1.2)
-    legend_TN = [mpatches.Patch(color=color, label=c) for c,color in colors.items()]
 
     cbar_kws={"orientation": "horizontal", "ticks":ticks}
     grid = sns.clustermap(corr, cmap=cmap, 
@@ -253,7 +291,7 @@ def corr_heatmap(X, y, classes=None,
     grid.ax_heatmap.tick_params(axis='x', length=0)
     grid.ax_heatmap.tick_params(axis='y', length=0)
 
-    if show_legend:
+    if show_legend and (y is not None):
         grid.ax_heatmap.legend(loc='upper center', 
                            bbox_to_anchor=bbox_to_anchor, 
                            handles=legend_TN, 
