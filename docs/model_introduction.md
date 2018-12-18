@@ -12,8 +12,8 @@ while:
 > <a href="https://www.codecogs.com/eqnedit.php?latex=p(c)&space;=&space;Discrete(c|\pi)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(c)&space;=&space;Discrete(c|\pi)" title="p(c) = Discrete(c|\pi)" /></a>  
 > <a href="https://www.codecogs.com/eqnedit.php?latex=p(z|c)&space;=&space;N(z|\mu&space;_{c},&space;\sigma_{c}^{2}I)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(z|c)&space;=&space;N(z|\mu&space;_{c},&space;\sigma_{c}^{2}I)" title="p(z|c) = N(z|\mu _{c}, \sigma_{c}^{2}I)" /></a>  
 > <a href="https://www.codecogs.com/eqnedit.php?latex=p(x|z)&space;=&space;N(x|\mu&space;_{x},&space;\sigma_{x}^{2}I)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?
-> <a href="https://www.codecogs.com/eqnedit.php?latex=p(x|z)&space;=&space;Ber(x|\mu&space;_{x})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?p(x|z)&space;=&space;Ber(x|\mu&space;_{x})" title="p(x|z) = Ber(x|\mu _{x})" /></a>
-  
+> <a href="https://www.codecogs.com/eqnedit.php?latex=p(x|z)&space;=&space;Ber(x|\mu&space;_{x})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?
+                                                                                                                             
 The log-likelihood of data:  
 > <a href="https://www.codecogs.com/eqnedit.php?latex=log&space;p(x)&space;=log\int_{z}^{&space;}&space;\sum_{c}^{&space;}&space;p(x,z,c)dz" target="_blank"><img src="https://latex.codecogs.com/gif.latex?log&space;p(x)&space;=log\int_{z}^{&space;}&space;\sum_{c}^{&space;}&space;p(x,z,c)dz" title="log p(x) =log\int_{z}^{ } \sum_{c}^{ } p(x,z,c)dz" /></a>  
 
