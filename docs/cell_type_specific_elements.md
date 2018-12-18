@@ -5,89 +5,55 @@
     from scale.utils import read_labels
     
     feature = pd.read_csv('../output/feature.txt', sep='\t', index_col=0, header=None)
-    ref, classes = read_labels('../data/labels.txt') # or predicted cluster assignments
+    ref, classes, le = read_labels('../data/labels.txt', return_enc=True) # or predicted cluster assignments
     imputed_data = pd.read_csv('../output/imputed_data.txt', sep='\t', index_col=0)
+    y = le.inverse_transform(ref)
     
-## feature heatmap
-plot latent feature heatmap
- 
-    plot_heatmap(feature.T, ref, classes, 
-                 figsize=(8, 3), cmap='RdBu_r', #vmax=8, vmin=-8,
-                 ylabel='Feature components', yticklabels=np.arange(10)+1, 
-                 cax_title='Feature value',
-                 row_cluster=False, legend_font=6, 
-                 col_cluster=False, center=0)
-![feature_heatmap](png/feature_heatmap.png)  
-               
-                 
-## feature specifity
-apply anova on the cell type specifity of feature against other cell types and plot the feature x cell type heatmap  
-colorbar is -log10(Pvalues)
-
-    feature_specifity(feature, ref, classes)
-![feature_specifity](png/feature_specifity.png)
     
 ## cell type specific peaks
 feature has 10 components(dimensions), each components has its most correlation peaks
-    
-    specific_peak_dir = '../output/specific_peaks/'
-    for i in range(feature.shape[1])[-2:]: # show the represented peaks of last two components of feature
-        peak_file = specific_peak_dir+'peak_index{}.txt'.format(i)
-        peak_index = open(peak_file).read().split()
-        peak_data = impute_data.loc[peak_index]
-        plot_heatmap(peak_data, ref, classes,
-                     cmap='Reds', 
-                     figsize=(8,3), 
-                     cax_title='Read counts', 
-                     ylabel='{} peaks of feature {}'.format(len(peak_index), i+1),
-                     vmax=1, vmin=0, legend_font=8,
-                     col_cluster=False, row_cluster=False,
-                     show_legend=True,
-                     show_cax = True,
-                     bbox_to_anchor=(0.4, 1.32),
-                    )
-![specific_peaks_of_feature9](png/specific_peaks_of_feature9.png)
-![specific_peaks_of_feature10](png/specific_peaks_of_feature10.png)
 
+    score_mat = mat_specificity_score(imputed_data, pred)
+    peak_index, peak_labels = cluster_specific(score_mat, classes=classes_, top=200);print(len(peak_index))
+    row_labels = ['cluster'+str(c+1) for c in peak_labels]
+
+save top specific peaks
+
+    f = open(out_dir+'specific_peaks.txt', 'w')
+    for peak in imputed_data.index[peak_index].values:
+        f.write(peak.replace('_', '\t')+'\n')
+        
+plot specific peaks heatmap
+
+    plot_heatmap(imputed_data.iloc[peak_index], y=y, classes=classes, y_pred=y_pred, row_labels=row_labels, 
+                 ncol=3,cmap='Reds', vmax=1, row_cluster=False, legend_font=6, cax_title='Peak Value',
+                 figsize=(6, 8), bbox_to_anchor=(0.4, 1.2), position=(0.8, 0.76, 0.1, 0.015))
+    
 ## cell type enriched motifs
 Apply [chromVAR](https://github.com/GreenleafLab/chromVAR) on specific peaks  
 We offer an Rscript ["chromVAR"](../scripts/chromVAR) in the scripts folder which can be run directly by:
 
-    e.g. chromVAR -i input_dir --peakfile peak_file -o output_dir
-    ! chromVAR -i ../output/ --peakfile ../data/peaks.txt -o ../output/chromVAR
-Input dir is output dir of SCALE including imputed_data.txt and specific_peaks dir
+    e.g. chromVAR -i input_dir -o output_dir
+    ! chromVAR -i ../output/
+Input dir is output dir of SCALE including imputed_data.txt and specific_peaks.txt
     
     
 Plot deviations heatmap of chromVAR
 
-    chromVAR_dir = '../output/chromVAR'
-    for i in list(range(feature.shape[1]))[-2:]:
-        dev = pd.read_csv(chromVAR_dir+'/dev{}'.format(i), index_col=0, sep='\t').fillna(0)
-        var = pd.read_csv(chromVAR_dir+'/var{}'.format(i), index_col=0, sep='\t')
+    dev = pd.read_csv(out_dir + 'dev.txt'.format(dataset), index_col=0, sep='\t').fillna(0)
+    var = pd.read_csv(out_dir + 'var.txt'.format(dataset), index_col=0, sep='\t')
 
-        figsize, N, bbox_to_anchor, position = (8,3), 20, (0.4, 1.3), (0.8, 0.78, .1, .016)
-        index = var.sort_values(by='variability', ascending=False).index[:N]
-        yticklabels = var.loc[index].name.values
-        plot_heatmap(dev.loc[index], ref, classes, 
-                     row_cluster=True, 
-                     col_cluster=False, 
-                     metric='Euclidean',
-                     yticklabels=yticklabels, 
-                     vmax=3, vmin=-3, 
-                     figsize=figsize, 
-                     legend_font=8,
-                     show_legend=True,
-                     show_cax=True,
-                     bbox_to_anchor=bbox_to_anchor,
-                     position=position,
-                     tick_color='black',
-                     cax_title='chromVAR deviation',
-                     cmap='RdBu_r')
-                     
-![enriched_motifs_of_feature9](png/enriched_motifs_of_feature9.png)
-![enriched_motifs_of_feature10](png/enriched_motifs_of_feature10.png)
-                    
-                 
-
-                 
-                 
+    figsize, N, bbox_to_anchor, position = (6, 8), 50, (0.4, 1.2), (0.8, 0.78, .1, .01)
+    index = var.sort_values(by='variability', ascending=False).index[:N]
+    # index = var.p_value_adj[var.p_value_adj < 0.05].index
+    yticklabels = var.loc[index].name.values
+    plot_heatmap(dev.loc[index], y=y, classes=classes,
+                 row_cluster=True,  
+                 yticklabels=yticklabels,
+                 vmax=3, vmin=-3, 
+                 figsize=figsize, 
+                 legend_font=6,
+                 bbox_to_anchor=bbox_to_anchor,
+                 position=position,
+                 cax_title='TF deviation',
+                 cmap='RdBu_r')

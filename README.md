@@ -1,5 +1,5 @@
 # SCALE
-Single-Cell ATAC-seq Analysis via Latent feature Extraction
+Single-Cell ATAC-seq analysis via Latent feature Extraction
 
 ### Installation  
 
@@ -40,8 +40,7 @@ Results will be saved in the output folder including:
 * feature.txt
 * cluster_assignments.txt
 * imputed_data.txt
-* specific_peaks/
-  - peak_index*.txt
+
 	
 Look for more usage of SCALE
 
@@ -49,9 +48,9 @@ Look for more usage of SCALE
 
 Use functions in SCALE.
 
-    import scale
+	import scale
 	from scale import *
-    from scale.plot import *
+	from scale.plot import *
 	from scale.utils import *
     
 
