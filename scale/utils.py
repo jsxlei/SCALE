@@ -217,6 +217,18 @@ def save_results(model, data, data_params, outdir):
         # all_peaks += list(peaks)
     # peak_file = os.path.join(peak_dir, 'peak_index.txt')
     # open(peak_file, 'w').write('\n'.join(set(all_peaks)))
+    
+
+def pairwise_pearson(A, B):
+    from scipy.stats import pearsonr
+    corrs = []
+    for i in range(A.shape[0]):
+        if A.shape == B.shape:
+            corr = pearsonr(A.iloc[i], B.iloc[i])[0]
+        else:
+            corr = pearsonr(A.iloc[i], B)[0]
+        corrs.append(corr)
+    return corrs
 
 # ================= Metrics ===================
 # =============================================

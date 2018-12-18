@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('--n_centroids', '-k', type=int, default=None, help='cluster number')
     parser.add_argument('--sep', type=str, default='\t', help='input data sep format \t or , ')
     parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
-    parser.add_argument('--no_results', action='store_true', help='Save the results')
+    parser.add_argument('--no_results', action='store_true', help='Not Save the results')
     parser.add_argument('--verbose', action='store_false', help='Print loss of training process')
     parser.add_argument('--reference', '-r', type=str, default='', help='Whether ground truth available')
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         epochs = args.epochs
 
     print("\n**********************************************************************")
-    print("  SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction")
+    print("  SCALE: Single-Cell ATAC-seq analysis via Latent feature Extraction")
     print("**********************************************************************\n")
     print("======== Parameters ========")
     print('Cell number: {}\nInput_dim: {}\nn_centroids: {}\nEpoch: {}\nSeed: {}\nDevice: {}'.format(
