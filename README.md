@@ -1,5 +1,5 @@
 # SCALE
-Single-Cell ATAC-seq Analysis via Latent feature Extraction
+Single-Cell ATAC-seq analysis via Latent feature Extraction
 
 ### Installation  
 
@@ -50,7 +50,7 @@ Use functions in SCALE.
 
 	import scale
 	from scale import *
-    	from scale.plot import *
+	from scale.plot import *
 	from scale.utils import *
     
 
