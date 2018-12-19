@@ -76,7 +76,10 @@ def sort_by_mad(data, axis=0):
     Sort genes by mad to select input features
     """
     genes = data.mad(axis=axis).sort_values(ascending=False).index
-    data = data.loc[:, genes]
+    if axis==0:
+        data = data.loc[:, genes]
+    else:
+        data = data.loc[genes]
     return data
 
 def gene_filter_(data, X=6):
@@ -144,6 +147,11 @@ def estimate_k(data):
             k += 1
     return k
 
+def get_decoder_weight(model_file):
+    state_dict = torch.load(model_file)
+    weight = state_dict['decoder.reconstruction.weight'].data.cpu().numpy()
+    return weight
+
 def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
     """
     Select represented peaks of each components of each peaks, 
@@ -152,7 +160,7 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
     filter peaks with weights more than cutoff=2.5 standard deviations from the mean.
 
     Input:
-        model_file: saved model of SCALE model.pt, containing the weight of decoder
+        weight: weight of decoder
         weight_index_file: weight_index.txt, match to original peaks index of data for weight index, 
                            because saved weight index is disorder result by sort_by_mad operation. 
         kind: both for both side, pos for positive side and neg for negative side.
@@ -194,10 +202,6 @@ def save_results(model, data, data_params, outdir):
     recon_x = model.get_imputed_data(data)
     recon_x = norm.inverse_transform(recon_x)
 
-    # 4. cell type specific peaks
-    weight = model.state_dict()['decoder.reconstruction.weight'].cpu().numpy()
-    specific_peaks = peak_selection(weight, weight_index, kind='both', cutoff=2.5)
-
     assign_file = os.path.join(outdir, 'cluster_assignments.txt')
     feature_file = os.path.join(outdir, 'feature.txt')
     impute_file = os.path.join(outdir, 'imputed_data.txt')
@@ -206,18 +210,6 @@ def save_results(model, data, data_params, outdir):
     pd.DataFrame(feature).to_csv(feature_file, sep='\t', header=False) # save latent feature
     pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
 
-    # save specific peaks
-    # peak_dir = outdir+'/specific_peaks/'
-    # if not os.path.exists(peak_dir):
-        # os.makedirs(peak_dir)
-    # all_peaks = []
-    # for i, peaks in enumerate(specific_peaks):
-        # peak_file = os.path.join(peak_dir, 'peak_index{}.txt'.format(i))
-        # open(peak_file, 'w').write('\n'.join(list(peaks)))
-        # all_peaks += list(peaks)
-    # peak_file = os.path.join(peak_dir, 'peak_index.txt')
-    # open(peak_file, 'w').write('\n'.join(set(all_peaks)))
-    
 
 def pairwise_pearson(A, B):
     from scipy.stats import pearsonr
