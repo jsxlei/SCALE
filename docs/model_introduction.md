@@ -1,6 +1,6 @@
 # Model introduction
 
-![model_introduction](png/model_introduction.png)
+![model_introduction](png/model.png)
 
 ## The evidence lower bound of SCALE
 SCALE combines variational autoencoder (VAE) and Gaussian Mixture Model (GMM) to model the distribution of high dimensional sparse scATAC-seq data. 
