@@ -5,15 +5,17 @@ Visualizate each cell as 2-dim scatter point of latent feature vis t-SNE colored
 
     import pandas as pd
     from scale.plot import plot_embedding
-    from utils.plot import read_labels
+    from scale.utils import get_decoder_weight, sort_by_mad
     
     feature_file = '../output/feature.txt'
     feature = pd.read_csv(feature_file, sep='\t', index_col=0, header=None) # read feature file
     
     assign_file = '../data/labels.txt' (ground truth) or '../output/cluster_assignments.txt' (predicted)
-    ref, classes = read_labels(assign_file) # ref is encoded labels, classes are cell types
+    y = pd.read_csv(assign_file, sep='\t', index_col=0, header=None)[1]
+    classes = np.unique(y)
    
-    plot_embedding(feature, ref, classes, markersize=10, figsize=(4,4))
+    legend_params = {'loc':'right', 'ncol':1, 'bbox_to_anchor':(0.4, 0.2), 'fontsize':8, 'markerscale':1.5}
+    plot_embedding(feature, y, classes=classes, markersize=10, figsize=(4,4), legend_params=legend_params )
     
     
 ![feature embedding](png/feature_embedding.png)
