@@ -29,11 +29,11 @@ To clone the repository and install manually, run the following from a terminal:
 
 The following code runs SCALE on test data located in the SCALE repository.
 
-	SCALE -d data/data.txt -k 6
+	SCALE.py -d data/data.txt -k 6
 
 or check clustering results with ground truth labels and save results in a specific folder
 
-	SCALE -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/
+	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/
 	
 Results will be saved in the output folder including:
 * model.pt
@@ -44,9 +44,9 @@ Results will be saved in the output folder including:
 	
 Look for more usage of SCALE
 
-	SCALE --help 
+	SCALE.py --help 
 
-Use functions in SCALE.
+Use functions in SCALE packages.
 
 	import scale
 	from scale import *
