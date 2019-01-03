@@ -11,7 +11,6 @@
         1. latent GMM feature
         2. cluster assignment
         3. imputation data
-        4. cell type specific peaks
 """
 
 
@@ -39,6 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('--reference', '-r', type=str, default='', help='Whether ground truth available')
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
     parser.add_argument('--epochs', '-e', type=int, default=None, help='Training epochs')
+    parser.add_argument('--lr', type=float, default=None, help='Learning rate')
     parser.add_argument('--device', default='cuda', help='Use gpu when training')
     parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
     parser.add_argument('--input_dim', type=int, default=None, help='Force input dim')
@@ -81,6 +81,10 @@ if __name__ == '__main__':
         epochs = config.epochs
     else:
         epochs = args.epochs
+    if args.lr is None:
+        lr = config.lr
+    else:
+        lr = args.lr
 
     print("\n**********************************************************************")
     print("  SCALE: Single-Cell ATAC-seq analysis via Latent feature Extraction")
@@ -99,7 +103,7 @@ if __name__ == '__main__':
         t0 = time.time()
         model.init_gmm_params(data)
         model.fit(dataloader,
-                  lr=config.lr, 
+                  lr=lr, 
                   weight_decay=config.weight_decay, 
                   epochs=epochs, 
                   verbose=args.verbose,

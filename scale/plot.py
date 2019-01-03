@@ -181,8 +181,8 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
         return grid
 
 
-def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap=None, 
-                   figsize=(4,4), markersize=10, save=None, name='', show_legend=True):
+def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap=None, show_label=True, 
+                   figsize=(4,4), markersize=10, save=None, name='', show_legend=True, return_emb=False):
     """
     Visualize TSNE embedding with labels
 
@@ -210,6 +210,9 @@ def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap
             X = ica.fit_transform(X)
             x_label = 'ICA dim 1'
             y_label = 'ICA dim 2'
+    else:
+        x_label = ''
+        y_label = ''
 
     if classes is None:
         classes = np.unique(y)
@@ -221,26 +224,27 @@ def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap
     plt.figure(figsize=figsize)
     for c in classes:
         plt.scatter(X[y==c,0], X[y==c,1], s=markersize, color=colors[c], label=c)
-    default_legend_params = {'loc':9, 
-            'bbox_to_anchor':(0.5,1.2), 
-            'fontsize':10, 
-            'ncol':3, 
+    default_legend_params = {'loc':'right', 
+            'bbox_to_anchor':(1.2,0.2), 
+            'fontsize':8, 
+            'ncol':1, 
             'frameon':False, 
-            'markerscale':2.5}
+            'markerscale':1.5}
     default_legend_params.update(legend_params)
     if show_legend:
         plt.legend(**default_legend_params)
-        # plt.legend(loc=9, bbox_to_anchor=(0.5,1.2), fontsize=10, ncol=3, frameon=False, markerscale=2.5)
-    # plt.gca().spines['top'].set_visible(False)
-    # plt.gca().spines['right'].set_visible(False)
     sns.despine(offset=10, trim=True)
-    plt.xlabel(x_label, fontsize=12)
-    plt.ylabel(y_label, fontsize=12)
+    if show_label:
+        plt.xlabel(x_label, fontsize=12)
+        plt.ylabel(y_label, fontsize=12)
 
     if save:
         plt.savefig(save, format='pdf')
     else:
         plt.show()
+
+    if return_emb:
+        return X
 
 
 def corr_heatmap(X, y=None, classes=None, 
