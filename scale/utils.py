@@ -32,7 +32,6 @@ def get_loader(data_file, input_dim=None, sep='\t',
         dataloader, data, data index, raw data index, columns, and normalizer
     """
     data = pd.read_csv(data_file, index_col=0, sep=sep)
-    # data[data>2] = 2
     raw_index = data.index
     columns = data.columns
     if gene_filter:
@@ -205,11 +204,11 @@ def save_results(model, data, data_params, outdir):
     assign_file = os.path.join(outdir, 'cluster_assignments.txt')
     feature_file = os.path.join(outdir, 'feature.txt')
     impute_file = os.path.join(outdir, 'imputed_data.txt')
-
+    
     pd.Series(pred).to_csv(assign_file, sep='\t', header=False) # save cluster assignments
     pd.DataFrame(feature).to_csv(feature_file, sep='\t', header=False) # save latent feature
     pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
-
+    
 
 def pairwise_pearson(A, B):
     from scipy.stats import pearsonr
@@ -264,10 +263,3 @@ def cluster_report(ref, pred, classes):
     print(classification_report(ref, pred, target_names=classes))
     ari_score = adjusted_rand_score(ref, pred)
     print("\nAdjusted Rand score : {:.4f}".format(ari_score))
-
-
-
-
-
-
-

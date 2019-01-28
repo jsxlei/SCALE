@@ -167,8 +167,9 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
     grid.ax_heatmap.set_ylabel(ylabel, fontsize=8)
     grid.ax_heatmap.set_xticklabels('')
     grid.ax_heatmap.set_yticklabels(yticklabels, color=tick_color)
+    grid.ax_heatmap.yaxis.set_label_position('left')
     grid.ax_heatmap.tick_params(axis='x', length=0)
-    grid.ax_heatmap.tick_params(axis='y', labelsize=6, length=0, rotation=0)
+    grid.ax_heatmap.tick_params(axis='y', labelsize=6, length=0, rotation=0, labelleft=True, labelright=False)
     grid.ax_row_dendrogram.set_visible(False)
     grid.cax.set_visible(show_cax)
     grid.row_color_labels = classes
@@ -211,8 +212,8 @@ def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap
             x_label = 'ICA dim 1'
             y_label = 'ICA dim 2'
     else:
-        x_label = ''
-        y_label = ''
+        x_label = 'tSNE dim 1'
+        y_label = 'tSNE dim 2'
 
     if classes is None:
         classes = np.unique(y)
@@ -253,6 +254,7 @@ def corr_heatmap(X, y=None, classes=None,
         show_cbar=True, 
         figsize=(5,5), 
         ncol=3, 
+        distance='pearson',
         ticks=None, 
         save=None,
         **kw):
@@ -277,7 +279,7 @@ def corr_heatmap(X, y=None, classes=None,
     # index = np.argsort(ref)
     # X = X.iloc[:,index]
     # ref = ref[index]
-    corr = X.corr()
+    corr = X.corr(method=distance)
 
 
 
@@ -305,7 +307,7 @@ def corr_heatmap(X, y=None, classes=None,
     if show_cbar:
         grid.cax.set_position((0.8, 0.76, .1, .02)) 
         grid.cax.tick_params(length=1, labelsize=4, rotation=0)
-        grid.cax.set_title('Pearson', fontsize=6, y=0.8)
+        grid.cax.set_title(distance, fontsize=6, y=0.8)
     else:
         grid.cax.set_visible(False)
 

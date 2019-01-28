@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction')
     parser.add_argument('--data', '-d', type=str, help='input data matrix peaks x samples')
-    parser.add_argument('--n_centroids', '-k', type=int, default=None, help='cluster number')
+    parser.add_argument('--n_centroids', '-k', type=int, help='cluster number')
     parser.add_argument('--sep', type=str, default='\t', help='input data sep format \t or , ')
     parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
     parser.add_argument('--no_results', action='store_true', help='Not Save the results')
@@ -39,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
     parser.add_argument('--epochs', '-e', type=int, default=None, help='Training epochs')
     parser.add_argument('--lr', type=float, default=None, help='Learning rate')
+    parser.add_argument('--batch_size', '-b', type=int, default=None, help='Batch size')
     parser.add_argument('--device', default='cuda', help='Use gpu when training')
     parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
     parser.add_argument('--input_dim', type=int, default=None, help='Force input dim')
@@ -52,17 +53,19 @@ if __name__ == '__main__':
     seed = args.seed
     np.random.seed(seed)
     torch.manual_seed(seed)
-    # if torch.cuda.is_available():
-        # torch.cuda.manual_seed_all(seed)
 
     args.device = args.device if torch.cuda.is_available() and args.device!="cpu" else "cpu" 
     device = torch.device(args.device)
+    if args.batch_size is None:
+        batch_size = config.batch_size
+    else:
+        batch_size = args.batch_size
 
     # Load data and labels
     data_params_ = get_loader(args.data, 
                               args.input_dim, 
                               sep=args.sep,
-                              batch_size=config.batch_size, 
+                              batch_size=batch_size, 
                               X=args.pct,
                               gene_filter=args.gene_filter,
                               log_transform=args.log_transform)
@@ -70,12 +73,7 @@ if __name__ == '__main__':
     cell_num = data.shape[0] 
     input_dim = data.shape[1] 	
 
-    if args.n_centroids is None:
-        est_k = estimate_k(data.t())
-        print('Estimate k: {}'.format(est_k))
-        k = est_k
-    else:
-        k = args.n_centroids
+    k = args.n_centroids
 
     if args.epochs is None:
         epochs = config.epochs
