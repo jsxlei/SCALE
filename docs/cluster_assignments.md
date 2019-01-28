@@ -1,6 +1,10 @@
 # Cluster assignments
 
-Compare cluster assignments with ground truth labels.txt
+Predicted cluster assignments result is saved in the cluster_assignments.txt file.  
+Default cluster method is using K-Means on the latent features saved in the feature.txt file.  
+You can use other clustering method with the latent features.
+
+## Compare cluster assignments with ground truth labels.txt
 
     from sklearn.metrics import confusion_matrix
     from scale.plot import plot_confusion_matrix
