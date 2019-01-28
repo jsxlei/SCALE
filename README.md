@@ -66,5 +66,5 @@ https://github.com/jsxlei/SCALE/tree/master/notebooks/tutorial.ipynb
 * [Inputs and Outputs](docs/inputs_and_outputs.md)
 * [Feature embedding](docs/feature_embedding.md)
 * [Cluster_assignments](docs/cluster_assignments.md)
-* [Imputed data analysis](docs/imputed_data_analysis.md)
+* [Denoising and Imputation](docs/denoising_and_imputation.md)
 * [Cell type specific elements](docs/cell_type_specific_elements.md)
