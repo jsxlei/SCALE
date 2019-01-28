@@ -31,9 +31,9 @@ The following code runs SCALE on test data located in the SCALE repository.
 
 	SCALE.py -d data/data.txt -k 6
 
-or check clustering results with ground truth labels and save results in a specific folder
+or check clustering results with ground truth labels and save results in a specific folder 
 
-	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/
+	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/ --lr 0.002
 	
 For larger dataset, we recommend set learning rate as 0.0002 with option (--lr 0.0002).
 	
