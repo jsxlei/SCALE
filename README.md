@@ -27,11 +27,17 @@ To clone the repository and install manually, run the following from a terminal:
 
 #### Quick Start
 
-The following code runs SCALE on test data located in the SCALE repository.
+Run SCALE with default parameters by providing a count matrix file and predefined cluster number:  
 
-	SCALE.py -d data/data.txt -k 6
+	SCALE.py -d [count_matrix] -k [n_cluster]
 
-or check clustering results with ground truth labels and save results in a specific folder 
+We also provide other options such as:  
+* check clustering results with ground truth labels: [-r] or [--ref]
+* save results in a specific folder: [-o] or [--outdir] 
+* modify the learning rate: [--lr]  
+* add more epochs if the loss not converge: [--epochs]  
+
+For example with test data located in the SCALE repository:  
 
 	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/ --lr 0.002
 	
