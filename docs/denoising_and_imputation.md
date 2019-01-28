@@ -1,5 +1,10 @@
 # Imputed data analysis
 
+Our imputed data is saved in the imputed_data.txt file.  
+SCALE performs denoising and imputation to remove the noise in the data and fill in the dropout zero values.  
+You can compare with the metacells of raw to make sure imputed data preserve the original distribution.  
+Or compare the inter and intra correlations.    
+
     from scale.utils import pairwise_pearson
     import numpy as np
     import seaborn as sns
