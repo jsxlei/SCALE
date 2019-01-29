@@ -35,13 +35,13 @@ We also provide other options such as:
 * check clustering results with ground truth labels: [-r] or [--ref]
 * save results in a specific folder: [-o] or [--outdir] 
 * modify the learning rate: [--lr]  
-* add more epochs if the loss not converge: [--epochs]  
+* add more epochs if the loss not converge: [-e] or [--epochs]  
 
 For example with test data located in the SCALE repository:  
 
 	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/ --lr 0.002
 	
-For larger dataset, we recommend set learning rate as 0.0002 with option (--lr 0.0002).
+For large dataset, we recommend setting learning rate as 0.0002 with option (--lr 0.0002).
 	
 Results will be saved in the output folder including:
 * model.pt
