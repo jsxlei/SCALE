@@ -12,7 +12,7 @@ Make sure Pytorch is working correctly with CUDA by:
 	
 	True
 	
-Currently SCALE currently requires Python 3 and does not work with Python 2.7
+Currently, SCALE requires Python 3 and does not work with Python 2.7
 
 #### Installation from GitHub
 
