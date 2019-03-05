@@ -22,6 +22,8 @@ To clone the repository and install manually, run the following from a terminal:
     cd SCALE
     pip install -r requirements.txt
     python setup.py install --user
+    
+Installation only requieres a few minutes.
 
 ### Usage
 
@@ -60,7 +62,9 @@ Use functions in SCALE packages.
 	from scale import *
 	from scale.plot import *
 	from scale.utils import *
-    
+	
+Running SCALE with Demo data on a normal desktop computer needs half an hour or even more.
+Running on GPU only needs a few minutes.
 
 #### Tutorials
 A demo on SCALE usage for single-cell ATAC-seq data can be found in this notebook: 
