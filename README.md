@@ -36,16 +36,18 @@ Run SCALE with default parameters by providing a count matrix file and predefine
 We also provide other options such as:  
 * check clustering results with ground truth labels: [-r] or [--ref]
 * save results in a specific folder: [-o] or [--outdir] 
-* modify the learning rate: [--lr]  
-* add more epochs if the loss not converge: [-e] or [--epochs]  
+* modify the learning rate, default is 0.0002: [--lr]  
+* change the batch size, default is 32: [--batch_size]
+* add more epochs if the loss not converge, default is 300: [-e] or [--epochs]  
 
-For example with test data located in the SCALE repository:  
+Run with custom options on example data located in the SCALE repository:  
 
-	SCALE.py -d data/data.txt -k 6 -e 1000 -o output/ --lr 0.002
+	SCALE.py -d data/data.txt -k 6 -e 1000 --lr 0.002
 	
 #### Note 
-For dataset with 1000+ cells, we recommend setting learning rate as 0.0002 with option (--lr 0.0002).  
-For dataset with 10,000+ cells, we recommend using bigger batch size, such as 128 or 256 to accelerate running time with option (--batch_size 128).    
+We recommend:   
+For dataset with 1,000+ cells, set learning rate = 0.0002 with option (--lr 0.0002).  
+For dataset with 10,000+ cells, increase batch size to reduce running time with option (--batch_size 128 or bigger).    
 	
 #### Results
 Results will be saved in the output folder including:
@@ -54,7 +56,7 @@ Results will be saved in the output folder including:
 * cluster_assignments.txt
 * imputed_data.txt
 
-	
+#### Help
 Look for more usage of SCALE
 
 	SCALE.py --help 
@@ -66,8 +68,11 @@ Use functions in SCALE packages.
 	from scale.plot import *
 	from scale.utils import *
 	
-Running SCALE with Demo data on a normal desktop computer needs half an hour or even more.
+#### Running time
+Apply SCALE with example data    
+Running on a normal desktop computer needs half an hour or more.
 Running on GPU only needs a few minutes.
+Increase batch size appropriately can also reduce the running time.   
 
 #### Tutorials
 A demo on SCALE usage for single-cell ATAC-seq data can be found in this notebook: 
