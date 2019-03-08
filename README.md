@@ -69,9 +69,9 @@ Use functions in SCALE packages.
 	from scale.utils import *
 	
 #### Running time
-Apply SCALE with example data    
-Running on a normal desktop computer needs half an hour or more.
-Running on GPU only needs a few minutes.
+Apply SCALE with example data:    
+Running on a normal desktop computer needs half an hour or more.  
+Running on GPU only needs a few minutes.  
 Increase batch size appropriately can also reduce the running time.   
 
 #### Tutorials
