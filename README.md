@@ -43,7 +43,8 @@ For example with test data located in the SCALE repository:
 
 	SCALE.py -d data/data.txt -k 6 -e 1000 -r data/labels.txt -o output/ --lr 0.002
 	
-For large dataset, we recommend setting learning rate as 0.0002 with option (--lr 0.0002).
+For large dataset, we recommend setting learning rate as 0.0002 with option (--lr 0.0002).  
+For dataset with 10,000+ cells, we recommend using bigger batch size, such as 128 or 256 to accelerate running time with option (--batch_size 128).    
 	
 Results will be saved in the output folder including:
 * model.pt
