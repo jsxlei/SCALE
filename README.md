@@ -10,7 +10,7 @@ Make sure Pytorch is working correctly with CUDA by:
 	import torch
 	print(torch.cuda.is_available())
 	
-	True
+	Flase
 	
 Currently, SCALE requires Python 3 and does not work with Python 2.7
 
