@@ -6,9 +6,6 @@
 # File Name: layer.py
 # Description:
 
-#
-
-#
 """
 
 import torch
