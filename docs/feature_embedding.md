@@ -1,4 +1,8 @@
 # Feature embedding
+Latent features of raw data are saved in the feature.txt file.  
+You can visualize the raw data structure with our well-learned low-dimension features by t-SNE.  
+You can also visualize the features in the form of heatmap ordered by cluster assignments.  
+Besides, if you want to know what the features exactly represent, you can identify and visualize the peaks pattern of each feature represent.  
 
 ## Visualization of feature
 Visualizate each cell as 2-dim scatter point of latent feature vis t-SNE colored by cluster assignments
@@ -20,7 +24,7 @@ Visualizate each cell as 2-dim scatter point of latent feature vis t-SNE colored
     
 ![feature embedding](png/feature_embedding.png)
 
-Plot heatmap of feature
+## Plot heatmap of feature
 
     plot_heatmap(feature.T, y, classes=classes, 
              figsize=(8, 3), cmap='RdBu_r', #vmax=8, vmin=-8,
@@ -31,7 +35,7 @@ Plot heatmap of feature
              
 ![feature heatmap](png/feature_heatmap.png)
 
-Inteprete the feature as cell type specific peak patterns
+## Inteprete the feature as cell type specific peak patterns
 
     weight = get_decoder_weight('../output/model.pt')
     weight_index = sort_by_mad(raw_data, axis=1).index

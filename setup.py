@@ -15,7 +15,7 @@ if sys.version_info[:2] < (3,6):
     raise RuntimeError("Python version >=3.6 required.")
 
 setup(name='SCALE',
-      version='0.9',
+      version='1.0.0',
       description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
       author='Xiong Lei',
       author_email='jsxlei@gmail.com',
