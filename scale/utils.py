@@ -21,39 +21,6 @@ from sklearn.metrics import classification_report, confusion_matrix, adjusted_ra
 # ============== Data Processing ==============
 # =============================================
 
-def get_loader(data_file, input_dim=None, sep='\t', 
-               batch_size=16, gene_filter=False, X=6, log_transform=False,
-               normalize=True):
-    """
-    Load data
-    Input:
-        data file: peaks x cells matrix
-    Return:
-        dataloader, data, data index, raw data index, columns, and normalizer
-    """
-    data = pd.read_csv(data_file, index_col=0, sep=sep)
-    raw_index = data.index
-    columns = data.columns
-    if gene_filter:
-        data = gene_filter_(data, X);print('* Gene Filter *')
-    if log_transform:
-        data = np.log2(data+1);print('* Log Transform *')
-    data = data.T
-
-    input_dim = input_dim if input_dim else data.shape[1]
-    data = sort_by_mad(data).iloc[:,:input_dim]
-    index = data.columns.values
-
-    norm = MinMaxScaler()
-    if normalize:
-        data = norm.fit_transform(data)
-
-    data = torch.Tensor(data)
-    dataloader = DataLoader(TensorDataset(data), batch_size, shuffle=True, num_workers=1)
-
-    return dataloader, data, index, raw_index, columns, norm	
-
-
 def read_labels(ref, return_enc=False):
     """
     Read labels and encode to 0, 1 .. k with class names 
@@ -69,18 +36,6 @@ def read_labels(ref, return_enc=False):
     else:
         return ref, classes
 
-
-def sort_by_mad(data, axis=0):
-    """
-    Sort genes by mad to select input features
-    """
-    genes = data.mad(axis=axis).sort_values(ascending=False).index
-    if axis==0:
-        data = data.loc[:, genes]
-    else:
-        data = data.loc[genes]
-    return data
-
 def gene_filter_(data, X=6):
     """
     Gene filter in SC3:
@@ -93,7 +48,7 @@ def gene_filter_(data, X=6):
         data is an array of shape (p,n)
     """
     total_cells = data.shape[1]
-    count_1 = data[data > 2].count(axis=1)
+    count_1 = data[data > 1].count(axis=1)
     count_2 = data[data > 0].count(axis=1)
 
     genelist_1 = count_1[count_1 > 0.01*X * total_cells].index
@@ -178,36 +133,6 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
             index = np.where(mean[i]-w > cutoff*std[i])[0]
         specific_peaks.append(weight_index[index])
     return specific_peaks
-
-
-def save_results(model, data, data_params, outdir):
-
-    if not os.path.exists(outdir):
-        os.makedirs(outdir)
-
-    model.eval()
-    torch.save(model.state_dict(), os.path.join(outdir, 'model.pt')) # save model file
-
-    weight_index, raw_index, columns, norm = data_params
-
-    ### output ###
-    # 1. latent GMM feature
-    feature = model.get_feature(data)
-
-    # 2. cluster assignments
-    pred = model.predict(data)
-
-    # 3. imputed data
-    recon_x = model.get_imputed_data(data)
-    recon_x = norm.inverse_transform(recon_x)
-
-    assign_file = os.path.join(outdir, 'cluster_assignments.txt')
-    feature_file = os.path.join(outdir, 'feature.txt')
-    impute_file = os.path.join(outdir, 'imputed_data.txt')
-    
-    pd.Series(pred).to_csv(assign_file, sep='\t', header=False) # save cluster assignments
-    pd.DataFrame(feature).to_csv(feature_file, sep='\t', header=False) # save latent feature
-    pd.DataFrame(recon_x.T, index=weight_index, columns=columns).loc[raw_index].to_csv(impute_file, sep='\t') # save imputed data
     
 
 def pairwise_pearson(A, B):
@@ -241,6 +166,7 @@ def reassign_cluster_with_ref(Y_pred, Y):
             y_[np.where(y_pred==i)] = j
         return y_
     from sklearn.utils.linear_assignment_ import linear_assignment
+    print(Y_pred.size, Y.size)
     assert Y_pred.size == Y.size
     D = max(Y_pred.max(), Y.max())+1
     w = np.zeros((D,D), dtype=np.int64)

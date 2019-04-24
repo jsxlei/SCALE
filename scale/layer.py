@@ -56,7 +56,7 @@ class Encoder(nn.Module):
         # self.sample = GaussianSample([x_dim, *h_dim][-1], z_dim)
 
     def forward(self, x):
-        x = self.hidden(x)
+        x = self.hidden(x);
         return self.sample(x)
 
 
@@ -130,9 +130,9 @@ class Stochastic(nn.Module):
         if self.training:
             std = torch.exp(0.5*logvar)
             eps = torch.randn_like(std)
-            return eps.mul(std).add_(mu)
+            return eps.mul(std).add_(mu).float()
         else:
-            return mu
+            return mu.float()
 
 class GaussianSample(Stochastic):
     """
@@ -150,34 +150,6 @@ class GaussianSample(Stochastic):
     def forward(self, x):
         mu = self.mu(x)
         log_var = self.log_var(x)
-
-        return self.reparametrize(mu, log_var), mu, log_var
-
-
-class GaussianMerge(GaussianSample):
-    """
-    Precision weighted merging of two Gaussian
-    distributions.
-    Merges information from z into the given
-    mean and log variance and produces
-    a sample from this new distribution.
-    """
-    def __init__(self, in_features, out_features):
-        super(GaussianMerge, self).__init__(in_features, out_features)
-
-    def forward(self, z, mu1, log_var1):
-        # Calculate precision of each distribution
-        # (inverse variance)
-        mu2 = self.mu(z)
-        log_var2 = F.softplus(self.log_var(z))
-        precision1, precision2 = (1/torch.exp(log_var1), 1/torch.exp(log_var2))
-
-        # Merge distributions into a single new
-        # distribution
-        mu = ((mu1 * precision1) + (mu2 * precision2)) / (precision1 + precision2)
-
-        var = 1 / (precision1 + precision2)
-        log_var = torch.log(var + 1e-8)
 
         return self.reparametrize(mu, log_var), mu, log_var
 

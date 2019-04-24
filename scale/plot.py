@@ -182,68 +182,54 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
         return grid
 
 
-def plot_embedding(X, y, classes=None, method='TSNE', legend_params={}, colormap=None, show_label=True, 
-                   figsize=(4,4), markersize=10, save=None, name='', show_legend=True, return_emb=False):
-    """
-    Visualize TSNE embedding with labels
-
-    Params:
-        X: nxf array, n is sample number, f is feature
-        y: a array of labels for n elements 
-        classes: reorder classes color
-    """
-    from sklearn.manifold import TSNE
-    from sklearn.decomposition import PCA, FastICA
-
+def plot_embedding(X, labels, classes=None, method='TSNE', cmap=None, 
+                   return_emb=False, save=False, show_legend=True, **legend_params):
     if X.shape[1] != 2:
-        if method == 'PCA':
-            pca = PCA(n_components=2, random_state=124)
-            X = pca.fit_transform(X)
-            ratio = pca.explained_variance_ratio_
-            x_label = 'PCA dim1 ratio: {:.2%}'.format(ratio[0])
-            y_label = 'PCA dim2 ratio: {:.2%}'.format(ratio[1])
-        elif method == 'TSNE':
+        if method == 'TSNE':
+            from sklearn.manifold import TSNE
             X = TSNE(n_components=2, random_state=124).fit_transform(X)
-            x_label = 'tSNE dim 1'
-            y_label = 'tSNE dim 2'
-        elif method == 'ICA':
-            ica = FastICA(n_components=2, random_state=124)
-            X = ica.fit_transform(X)
-            x_label = 'ICA dim 1'
-            y_label = 'ICA dim 2'
-    else:
-        x_label = 'tSNE dim 1'
-        y_label = 'tSNE dim 2'
-
+        if method == 'UMAP':
+            from umap import UMAP
+            X = UMAP(n_neighbors=30, min_dist=0.3, metric='correlation').fit_transform(X)
+        if method == 'PCA':
+            from sklearn.decomposition import PCA
+            X = PCA(n_components=2, random_state=124).fit_transform(X)
+        
+    plt.figure(figsize=(8, 8))
     if classes is None:
-        classes = np.unique(y)
-    if colormap is None:
-        colormap = plt.cm.tab20
-        colors = {c:colormap(i) for i,c in enumerate(classes)}
-    else:
-        colors = {c:colormap[i] for i,c in enumerate(classes)}
-    plt.figure(figsize=figsize)
-    for c in classes:
-        plt.scatter(X[y==c,0], X[y==c,1], s=markersize, color=colors[c], label=c)
-    default_legend_params = {'loc':'right', 
-            'bbox_to_anchor':(1.2,0.2), 
-            'fontsize':8, 
-            'ncol':1, 
-            'frameon':False, 
-            'markerscale':1.5}
-    default_legend_params.update(legend_params)
-    if show_legend:
-        plt.legend(**default_legend_params)
-    sns.despine(offset=10, trim=True)
-    if show_label:
-        plt.xlabel(x_label, fontsize=12)
-        plt.ylabel(y_label, fontsize=12)
+        classes = np.unique(labels)
 
+    if len(classes) <= 10:
+        cmap = 'tab10'
+    elif len(classes) <= 20:
+        cmap = 'tab20'
+    else:
+        cmap = 'husl'
+    colors = sns.color_palette(cmap, n_colors=len(classes))
+        
+    for i, c in enumerate(classes):
+        plt.scatter(X[labels==c, 0], X[labels==c, 1], color=colors[i], \
+                                    label=c, s=10, edgecolors='none', alpha=0.8)
+    plt.axis("off")
+    
+    legend_params_ = {'loc': 'center left',
+                     'bbox_to_anchor':(1.0, 0.45),
+                     'fontsize': 10,
+                     'ncol': 1,
+                     'frameon': False,
+                     'markerscale': 1.5
+                    }
+    legend_params_.update(legend_params_)
+    if show_legend:
+        plt.legend(**legend_params)
     if save:
-        plt.savefig(save, format='pdf')
+        if os.path.isfile(save):
+            print('remove previous figure {}'.format(save))
+            os.remove(save)
+        plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()
-
+        
     if return_emb:
         return X
 

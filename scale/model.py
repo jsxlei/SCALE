@@ -23,7 +23,7 @@ from .loss import elbo, elbo_SCALE
 
 
 class VAE(nn.Module):
-    def __init__(self, dims, device='cpu', bn=False, dropout=0, binary=True):
+    def __init__(self, dims, bn=False, dropout=0, binary=True):
         """
         Variational Autoencoder [Kingma 2013] model
         consisting of an encoder/decoder pair for which
@@ -34,7 +34,6 @@ class VAE(nn.Module):
         """
         super(VAE, self).__init__()
         [x_dim, z_dim, encode_dim, decode_dim] = dims
-        self.device = device
         self.binary = binary
         if binary:
             decode_activation = nn.Sigmoid()
@@ -74,9 +73,8 @@ class VAE(nn.Module):
         z, mu, logvar = self.encoder(x)
         recon_x = self.decoder(z)
         likelihood, kld = elbo(recon_x, x, (mu, logvar), binary=self.binary)
-        self.likelihood = likelihood
-        self.kld = kld
-        return -(likelihood - kld) 
+        
+        return (-likelihood, kld)
 
     def get_feature(self, data):
         """
@@ -90,7 +88,7 @@ class VAE(nn.Module):
         """
         return self.forward(data).cpu().detach().numpy()
 
-    def predict(self, data):
+    def predict(self, dataloader, device='cpu'):
         """
         Predict assignments applying k-means on latent feature
 
@@ -99,14 +97,12 @@ class VAE(nn.Module):
         Return:
             predicted cluster assignments
         """
-        self.eval()
-        feature = self.get_feature(data)
+#         self.eval()
+#         feature = self.get_feature(data)
+        feature = self.encodeBatch(dataloader, device)
         from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
         kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
-        # try:
         pred = kmeans.fit_predict(feature); 
-        # except:
-            # pred = np.random.choice(range(self.n_centroids), size=len(feature)) # random pred
         return pred
 
     def load_model(self, path):
@@ -121,38 +117,62 @@ class VAE(nn.Module):
         lr=0.002, 
         weight_decay=5e-4,
         print_interval=10, 
-        device=None,
+        device='cpu',
         verbose=True,
        ):
-        if device is None:
-            device = self.device
-        else:
-            device = device
-
+        
+        self.to(device)
         optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay) 
         for epoch in range(epochs):
             epoch_lr = adjust_learning_rate(lr, optimizer, epoch)	
             epoch_loss = 0
+            epoch_recon_loss = 0
+            epoch_kl_loss = 0
             self.train()
             for i, x in enumerate(dataloader):
-                x = x[0].to(device)
+                x = x.float().to(device)
                 optimizer.zero_grad()
-                loss = self.loss_function(x)/len(x)
+                recon_loss, kl_loss = self.loss_function(x)
+                loss = (recon_loss+kl_loss)/len(x)
                 loss.backward()
                 optimizer.step()
                 epoch_loss += loss.item()
-            avg_loss = epoch_loss/len(dataloader)
+                epoch_recon_loss += recon_loss.item()/len(x)
+                epoch_kl_loss += kl_loss.item()/len(x)
 
             # Display Training Process
             if (epoch+1) % print_interval == 0 or epoch==0:
                 if verbose:
-                    print('[Epoch {:3d}] Loss: {:.3f} lr: {:.4f}'.format(epoch+1, epoch_loss/len(dataloader), epoch_lr))
+                    print('[Epoch {:3d}] Loss: {:.3f} recon_loss: {:.3f} kl_loss: {:.3f} lr: {:.4f}'.format(
+            epoch+1, epoch_loss/len(dataloader), epoch_recon_loss/len(dataloader), epoch_kl_loss/len(dataloader), epoch_lr))
+                    
+    def encodeBatch(self, dataloader, device='cpu', out='z', transforms=None):
+        self.eval()
+        output = []
+        for i, inputs in enumerate(dataloader):
+            x = inputs
+            x = x.view(x.size(0), -1).float().to(device)
+#             mu, var, z, recon_x = self.forward(x)
+            z, mu, logvar = self.encoder(x)
+            recon_x = self.decoder(z)
+            
+            if out == 'z':
+                output.append(z.detach().cpu())
+            elif out == 'x':
+                output.append(recon_x.detach().cpu().data)
+
+        output = torch.cat(output).numpy()
+        if out == 'x':
+            for transform in transforms:
+                output = transform(output)
+        return output
+
 
 
 
 class SCALE(VAE):
-    def __init__(self, dims, n_centroids, device='cpu'):
-        super(SCALE, self).__init__(dims, device)
+    def __init__(self, dims, n_centroids):
+        super(SCALE, self).__init__(dims)
         self.beta = DeterministicWarmup(n=100, t_max=1)
         self.n_centroids = n_centroids
         z_dim = dims[1]
@@ -167,10 +187,7 @@ class SCALE(VAE):
         recon_x = self.decoder(z)
         gamma, mu_c, var_c, pi = self.get_gamma(z) #, self.n_centroids, c_params)
         likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
-        self.likelihood = likelihood
-        self.kld = kld
-
-        return -(likelihood - next(self.beta)*kld) 
+        return -likelihood, next(self.beta)*kld
 
     def get_gamma(self, z):
         """
@@ -194,11 +211,11 @@ class SCALE(VAE):
 
         return gamma, mu_c, var_c, pi
 
-    def init_gmm_params(self, data):
+    def init_gmm_params(self, dataloader, device='cpu'):
         """
         Init SCALE model with GMM model parameters
         """
-        z = self.get_feature(data)
+        z = self.encodeBatch(dataloader, device)
         gmm = GaussianMixture(n_components=self.n_centroids, covariance_type='diag')
         gmm.fit(z)
         self.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))
