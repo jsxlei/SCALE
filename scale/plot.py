@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
+# import os
 
 # plt.rcParams['savefig.dpi'] = 300
 # plt.rcParams['figure.dpi'] = 300
@@ -91,9 +92,9 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
     if show_cbar:
         plt.colorbar(shrink=0.8) 
     if save:
-        plt.savefig(save, format='pdf')
-    else:
-        plt.show()
+        plt.savefig(save, format='pdf', bbox_inches='tight')
+    
+    plt.show()
 
 
 def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None, 
@@ -175,17 +176,17 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
     grid.row_color_labels = classes
 
     if save:
-        plt.savefig(save, format='pdf')
+        plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()
     if return_grid:
         return grid
 
 
-def plot_embedding(X, labels, classes=None, method='TSNE', cmap=None, 
-                   return_emb=False, save=False, show_legend=True, **legend_params):
+def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize=(4, 4), markersize=10,
+                   return_emb=False, save=False, save_emb=False, show_legend=True, show_axis_label=True, **legend_params):
     if X.shape[1] != 2:
-        if method == 'TSNE':
+        if method == 'tSNE':
             from sklearn.manifold import TSNE
             X = TSNE(n_components=2, random_state=124).fit_transform(X)
         if method == 'UMAP':
@@ -195,11 +196,13 @@ def plot_embedding(X, labels, classes=None, method='TSNE', cmap=None,
             from sklearn.decomposition import PCA
             X = PCA(n_components=2, random_state=124).fit_transform(X)
         
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=figsize)
     if classes is None:
         classes = np.unique(labels)
 
-    if len(classes) <= 10:
+    if cmap is not None:
+        cmap = cmap
+    elif len(classes) <= 10:
         cmap = 'tab10'
     elif len(classes) <= 20:
         cmap = 'tab20'
@@ -208,9 +211,8 @@ def plot_embedding(X, labels, classes=None, method='TSNE', cmap=None,
     colors = sns.color_palette(cmap, n_colors=len(classes))
         
     for i, c in enumerate(classes):
-        plt.scatter(X[labels==c, 0], X[labels==c, 1], color=colors[i], \
-                                    label=c, s=10, edgecolors='none', alpha=0.8)
-    plt.axis("off")
+        plt.scatter(X[labels==c, 0], X[labels==c, 1], s=markersize, color=colors[i], label=c)
+#     plt.axis("off")
     
     legend_params_ = {'loc': 'center left',
                      'bbox_to_anchor':(1.0, 0.45),
@@ -219,17 +221,24 @@ def plot_embedding(X, labels, classes=None, method='TSNE', cmap=None,
                      'frameon': False,
                      'markerscale': 1.5
                     }
-    legend_params_.update(legend_params_)
+    legend_params_.update(**legend_params)
     if show_legend:
-        plt.legend(**legend_params)
+        plt.legend(**legend_params_)
+    sns.despine(offset=10, trim=True)
+    if show_axis_label:
+        plt.xlabel(method+' dim 1', fontsize=12)
+        plt.ylabel(method+' dim 2', fontsize=12)
+
     if save:
-        if os.path.isfile(save):
-            print('remove previous figure {}'.format(save))
-            os.remove(save)
+#         if os.path.isfile(save):
+#             print('remove previous figure {}'.format(save))
+#             os.remove(save)
         plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()
         
+    if save_emb:
+        np.savetxt(save_emb, X)
     if return_emb:
         return X
 
@@ -298,12 +307,12 @@ def corr_heatmap(X, y=None, classes=None,
         grid.cax.set_visible(False)
 
     if save:
-        plt.savefig(save, format='pdf')
+        plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()
 
 
-def feature_specifity(feature, ref, classes, figsize=(6,6)):
+def feature_specifity(feature, ref, classes, figsize=(6,6), save=None):
     """
     Calculate the feature specifity:
 
@@ -335,6 +344,11 @@ def feature_specifity(feature, ref, classes, figsize=(6,6)):
     grid.set_yticklabels(labels=np.arange(dim)+1, fontsize=16)
     cbar = grid.collections[0].colorbar
     cbar.set_label('-log10 (Pvalue)', fontsize=18) #, rotation=0, x=-0.9, y=0)
+    
+    if save:
+        plt.savefig(save, format='pdf', bbox_inches='tight')
+    else:
+        plt.show()
 
 
 

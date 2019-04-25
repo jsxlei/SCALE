@@ -57,6 +57,17 @@ def gene_filter_(data, X=6):
     data = data.loc[genelist]
     return data
 
+def sort_by_mad(data, axis=0):
+    """
+    Sort genes by mad to select input features
+    """
+    genes = data.mad(axis=axis).sort_values(ascending=False).index
+    if axis==0:
+        data = data.loc[:, genes]
+    else:
+        data = data.loc[genes]
+    return data
+
 
 # =========== scATAC Preprocessing =============
 # ==============================================
@@ -166,7 +177,7 @@ def reassign_cluster_with_ref(Y_pred, Y):
             y_[np.where(y_pred==i)] = j
         return y_
     from sklearn.utils.linear_assignment_ import linear_assignment
-    print(Y_pred.size, Y.size)
+#     print(Y_pred.size, Y.size)
     assert Y_pred.size == Y.size
     D = max(Y_pred.max(), Y.max())+1
     w = np.zeros((D,D), dtype=np.int64)
