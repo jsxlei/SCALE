@@ -43,7 +43,7 @@ cluster number k will be estimated if k is not provided:
 
 	SCALE.py -d [input_dir]
 
-Useful options:  
+#### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
 * filter rare peaks if the peaks quality if not good or too many: [-x]
 * modify the initial learning rate, default is 0.002: [--lr]  
