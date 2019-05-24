@@ -76,11 +76,10 @@ Use functions in SCALE packages.
 	from scale.utils import *
 	
 #### Running time
-![](docs/png/runtime.png)  ![](docs/png/memory.png)
-Apply SCALE with example data:    
-Running on a normal desktop computer needs half an hour or more.  
-Running on GPU only needs a few minutes.  
-Increase batch size appropriately can also reduce the running time.   
+<p float="left">
+  <img src="docs/png/runtime.png" width="400" />
+  <img src="docs/png/memory.png" width="400" /> 
+</p>
 
 #### Tutorials
 A demo on SCALE usage for single-cell ATAC-seq data can be found in this notebook: 
