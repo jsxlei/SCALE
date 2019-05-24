@@ -6,7 +6,7 @@ Single-Cell ATAC-seq analysis via Latent feature Extraction
 SCALE neural network is implemented in [Pytorch](https://pytorch.org/) framework.  
 Running SCALE on CUDA is recommended if available.   
 	
-Currently, SCALE requires Python 3 and does not work with Python 2.7
+Currently, SCALE requires Python 3.6+ and does not work with Python 2.7
 
 #### Installation from GitHub
 
@@ -23,34 +23,35 @@ Installation only requieres a few minutes.
 
 #### Quick Start
 
-Run SCALE with default parameters by providing input dir containing count matrix file:
+Run SCALE on count matrix file: 
+* dense matrix: data.txt/data.txt.gz
+* sparse matrix: data.mtx/data.mtx.gz, peaks.txt and cell_id.txt
 
-	SCALE.py -d [input_dir]
-	
-input dir should contain data of either dense or sparse form:  
-* dense form: data.txt/data.txt.gz
-* sparse form: data.mtx/data.mtx.gz, peaks.txt and cell_id.txt
-
-Or provide predefined cluster number k with option [-k]: 
-
-	SCALE.py -d [input_dir] -k [k]
-
-Other useful options:  
-* save results in a specific folder: [-o] or [--outdir] 
-* filter rare peaks if the peaks quality if not good: [-x]
-* modify the initial learning rate, default is 0.002: [--lr]  
-* change the batch size, default is 32: [--batch_size]
-* change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
-
-Run SCALE on [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
+Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
 
 	SCALE.py -d Forebrain -k 6
 	
-Run SCALE on [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset:
+Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset:
 	
 	SCALE.py -d mouse_atlas -k 30 -x 4
+
+cluster number k will be estimated if k is not provided: 
+
+	SCALE.py -d [input_dir]
+
+Useful options:  
+* save results in a specific folder: [-o] or [--outdir] 
+* filter rare peaks if the peaks quality if not good or too many: [-x]
+* modify the initial learning rate, default is 0.002: [--lr]  
+* change the batch size, default is 32: [--batch_size]
+* change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
+* change random seed for parameter initialization, default is 18: [--seed]
 	
 #### Note    
+If come across the nan loss, 
+* try another random seed
+* filter peaks with harsh threshold like -x 4 or -x 6
+* change the initial learning rate to 0.0002 
 	
 #### Results
 Results will be saved in the output folder including:
