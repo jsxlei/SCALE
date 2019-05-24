@@ -76,6 +76,7 @@ Use functions in SCALE packages.
 	from scale.utils import *
 	
 #### Running time
+![](docs/png/runtime.png)  ![](docs/png/memory.png)
 Apply SCALE with example data:    
 Running on a normal desktop computer needs half an hour or more.  
 Running on GPU only needs a few minutes.  
