@@ -46,6 +46,7 @@ Useful options:
 * change the batch size, default is 32: [--batch_size]
 * change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
 * change random seed for parameter initialization, default is 18: [--seed]
+* binarize the imputation values: [--binary]
 	
 #### Note    
 If come across the nan loss, 
