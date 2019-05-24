@@ -26,7 +26,7 @@ from scale import SCALE
 from scale.dataset import SingleCellDataset
 from scale.utils import read_labels, cluster_report, estimate_k, binarization
 
-from sklearn.preprocessing import MinMaxScaler, MaxAbsScaler
+from sklearn.preprocessing import MaxAbsScaler
 from torch.utils.data import DataLoader
 
 
@@ -44,12 +44,12 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', '-b', type=int, default=32, help='Batch size')
     parser.add_argument('--device', default='cuda', help='Use gpu when training')
     parser.add_argument('--seed', type=int, default=18, help='Random seed for repeat results')
-    parser.add_argument("--beta", type=int, default=1)
-    parser.add_argument('-n', type=int, default=200)
+    # parser.add_argument("--beta", type=int, default=1)
+    # parser.add_argument('-n', type=int, default=200)
     parser.add_argument('--encode_dim', type=int, nargs='*', default=[1024, 128], help='encoder structure')
     parser.add_argument('--decode_dim', type=int, nargs='*', default=[], help='encoder structure')
     parser.add_argument('--latent', '-l',type=int, default=10, help='latent layer dim')
-    parser.add_argument('-x', type=int, default=0, help='Remove peaks (signal > 0) in less than X% of cells')
+    parser.add_argument('-x', type=int, default=0, help='Remove peaks (signal > 0) in less than X percent of cells')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')
     parser.add_argument('--weight_decay', type=float, default=5e-4)
