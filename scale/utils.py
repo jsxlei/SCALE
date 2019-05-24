@@ -15,7 +15,7 @@ import os
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder, scale
 from sklearn.metrics import classification_report, confusion_matrix, adjusted_rand_score
 
 # ============== Data Processing ==============
@@ -88,9 +88,27 @@ def sample_filter(data, x=10, n_reads=2):
     data = cell_filter(data)
     return data
 
-
 # =================== Other ====================
 # ==============================================
+# def filter_peaks(data, X=5):
+#     """
+#     data n_cells x n_peaks
+#     """
+#     total_cells = data.shape[0]
+#     count = np.array((data >0).sum(0)).squeeze()
+#     indices = np.where(count > 0.01*X*total_cells)[0]
+#     data = data[:, indices]
+#     return data
+
+# def filter_cells(data):
+#     """
+#     data n_cells x n_peaks
+#     """
+#     count = np.array((data>0).sum(1)).squeeze()
+#     indices = np.where(count>np.quantile(count, 0.1))[0]
+#     data = data[indices]
+#     return data
+
 def estimate_k(data):
     """
     Estimate number of groups k:
@@ -103,7 +121,8 @@ def estimate_k(data):
     muTW = (np.sqrt(n-1) + np.sqrt(p)) ** 2
     sigmaTW = (np.sqrt(n-1) + np.sqrt(p)) * (1/np.sqrt(n-1) + 1/np.sqrt(p)) ** (1/3)
     sigmaHatNaive = x.T.dot(x)
-    bd = 3.273 * sigmaTW + muTW
+
+    bd = np.sqrt(p) * sigmaTW + muTW
     evals = np.linalg.eigvalsh(sigmaHatNaive)
 
     k = 0
@@ -187,7 +206,6 @@ def reassign_cluster_with_ref(Y_pred, Y):
 
     return reassign_cluster(Y_pred, ind)
 
-
 def cluster_report(ref, pred, classes):
     """
     Print Cluster Report
@@ -200,3 +218,19 @@ def cluster_report(ref, pred, classes):
     print(classification_report(ref, pred, target_names=classes))
     ari_score = adjusted_rand_score(ref, pred)
     print("\nAdjusted Rand score : {:.4f}".format(ari_score))
+
+    
+def binarization(imputed, raw):
+    """
+    Transform imputed float values to binary
+        imputed values at (i, j) -> 1: 
+            greater than average value of ith peak in raw data
+            greater than average value of jth cell in raw data
+        otherwise 0
+    """
+    peak_mean = raw.mean(1)
+    cell_mean = raw.mean(0)
+    v1 = imputed.gt(peak_mean, axis=0)
+    v2 = imputed.gt(cell_mean, axis=1)
+    binary = (v1 & v2).astype(int)
+    return binary

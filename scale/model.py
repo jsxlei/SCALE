@@ -12,9 +12,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import init
+from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, ReduceLROnPlateau
 
+import time
 import math
 import numpy as np
+from tqdm import trange
 from itertools import repeat
 from sklearn.mixture import GaussianMixture
 
@@ -73,22 +76,11 @@ class VAE(nn.Module):
         z, mu, logvar = self.encoder(x)
         recon_x = self.decoder(z)
         likelihood, kld = elbo(recon_x, x, (mu, logvar), binary=self.binary)
-        
+
         return (-likelihood, kld)
 
-    def get_feature(self, data):
-        """
-        obtain latent features from torch tensor data
-        """
-        return self.encoder(data)[0].cpu().detach().numpy()
 
-    def get_imputed_data(self, data):
-        """
-        obtain imputed data from torch tensor data
-        """
-        return self.forward(data).cpu().detach().numpy()
-
-    def predict(self, dataloader, device='cpu'):
+    def predict(self, dataloader, device='cpu', method='kmeans'):
         """
         Predict assignments applying k-means on latent feature
 
@@ -97,12 +89,16 @@ class VAE(nn.Module):
         Return:
             predicted cluster assignments
         """
-#         self.eval()
-#         feature = self.get_feature(data)
-        feature = self.encodeBatch(dataloader, device)
-        from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
-        kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
-        pred = kmeans.fit_predict(feature); 
+
+        if method == 'kmeans':
+            from sklearn.cluster import KMeans, MiniBatchKMeans, AgglomerativeClustering
+            feature = self.encodeBatch(dataloader, device)
+            kmeans = KMeans(n_clusters=self.n_centroids, n_init=20, random_state=0)
+            pred = kmeans.fit_predict(feature)
+        elif method == 'gmm':
+            logits = self.encodeBatch(dataloader, device, out='logit')
+            pred = np.argmax(logits, axis=1)
+
         return pred
 
     def load_model(self, path):
@@ -113,53 +109,59 @@ class VAE(nn.Module):
         self.load_state_dict(model_dict)
 
     def fit(self, dataloader,
-        epochs=300,
-        lr=0.002, 
-        weight_decay=5e-4,
-        print_interval=10, 
-        device='cpu',
-        verbose=True,
+            lr=0.002, 
+            weight_decay=5e-4,
+            device='cpu',
+            beta = 1,
+            n = 200,
+            max_iter=30000,
+            verbose=True,
+            name=''
        ):
-        
+
         self.to(device)
         optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay) 
-        for epoch in range(epochs):
-            epoch_lr = adjust_learning_rate(lr, optimizer, epoch)	
-            epoch_loss = 0
-            epoch_recon_loss = 0
-            epoch_kl_loss = 0
-            self.train()
-            for i, x in enumerate(dataloader):
-                x = x.float().to(device)
-                optimizer.zero_grad()
-                recon_loss, kl_loss = self.loss_function(x)
-                loss = (recon_loss+kl_loss)/len(x)
-                loss.backward()
-                optimizer.step()
-                epoch_loss += loss.item()
-                epoch_recon_loss += recon_loss.item()/len(x)
-                epoch_kl_loss += kl_loss.item()/len(x)
-
-            # Display Training Process
-            if (epoch+1) % print_interval == 0 or epoch==0:
-                if verbose:
-                    print('[Epoch {:3d}] Loss: {:.3f} recon_loss: {:.3f} kl_loss: {:.3f} lr: {:.4f}'.format(
-            epoch+1, epoch_loss/len(dataloader), epoch_recon_loss/len(dataloader), epoch_kl_loss/len(dataloader), epoch_lr))
+        Beta = DeterministicWarmup(n=n, t_max=beta)
+        
+        iteration = 0
+        with trange(max_iter, disable=verbose) as pbar:
+            while True:    
+                for i, x in enumerate(dataloader):
+                    epoch_lr = adjust_learning_rate(lr, optimizer, iteration)
+                    t0 = time.time()
+                    x = x.float().to(device)
+                    optimizer.zero_grad()
                     
+                    recon_loss, kl_loss = self.loss_function(x)
+                    loss = (recon_loss + next(Beta) * kl_loss)/len(x);
+                    loss.backward()
+                    optimizer.step()
+                    
+                    pbar.set_description('{} [loss]{:.3f}  [recon_loss]{:.3f} [kl_loss]{:.3f}'.format(
+                            name, loss, recon_loss/len(x), kl_loss/len(x)))
+                    pbar.update(1)
+                    
+                    iteration+=1
+                    if iteration >= max_iter:
+                        break
+                else:
+                    continue
+                break
+
     def encodeBatch(self, dataloader, device='cpu', out='z', transforms=None):
-        self.eval()
         output = []
         for i, inputs in enumerate(dataloader):
             x = inputs
             x = x.view(x.size(0), -1).float().to(device)
-#             mu, var, z, recon_x = self.forward(x)
             z, mu, logvar = self.encoder(x)
-            recon_x = self.decoder(z)
-            
+
             if out == 'z':
                 output.append(z.detach().cpu())
             elif out == 'x':
+                recon_x = self.decoder(z)
                 output.append(recon_x.detach().cpu().data)
+            elif out == 'logit':
+                output.append(self.get_gamma(z)[0].cpu().detach())
 
         output = torch.cat(output).numpy()
         if out == 'x':
@@ -169,11 +171,9 @@ class VAE(nn.Module):
 
 
 
-
 class SCALE(VAE):
     def __init__(self, dims, n_centroids):
         super(SCALE, self).__init__(dims)
-        self.beta = DeterministicWarmup(n=100, t_max=1)
         self.n_centroids = n_centroids
         z_dim = dims[1]
 
@@ -187,7 +187,8 @@ class SCALE(VAE):
         recon_x = self.decoder(z)
         gamma, mu_c, var_c, pi = self.get_gamma(z) #, self.n_centroids, c_params)
         likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
-        return -likelihood, next(self.beta)*kld
+
+        return -likelihood, kld
 
     def get_gamma(self, z):
         """
@@ -196,14 +197,13 @@ class SCALE(VAE):
         gamma is q(c|x)
         q(c|x) = p(c|z) = p(c)p(c|z)/p(z)
         """
-        pi, mu_c, var_c = self.pi, self.mu_c, self.var_c
         n_centroids = self.n_centroids
 
         N = z.size(0)
         z = z.unsqueeze(2).expand(z.size(0), z.size(1), n_centroids)
-        pi = pi.repeat(N,1) # NxK
-        mu_c = mu_c.repeat(N,1,1) # NxDxK
-        var_c = var_c.repeat(N,1,1) # NxDxK
+        pi = self.pi.repeat(N,1) # NxK
+        mu_c = self.mu_c.repeat(N,1,1) # NxDxK
+        var_c = self.var_c.repeat(N,1,1) # NxDxK
 
         # p(c,z) = p(c)*p(z|c) as p_c_z
         p_c_z = torch.exp(torch.log(pi) - torch.sum(0.5*torch.log(2*math.pi*var_c) + (z-mu_c)**2/(2*var_c), dim=1)) + 1e-10
@@ -215,16 +215,15 @@ class SCALE(VAE):
         """
         Init SCALE model with GMM model parameters
         """
-        z = self.encodeBatch(dataloader, device)
         gmm = GaussianMixture(n_components=self.n_centroids, covariance_type='diag')
+        z = self.encodeBatch(dataloader, device)
         gmm.fit(z)
         self.mu_c.data.copy_(torch.from_numpy(gmm.means_.T.astype(np.float32)))
         self.var_c.data.copy_(torch.from_numpy(gmm.covariances_.T.astype(np.float32)))
 
 
-
-def adjust_learning_rate(init_lr, optimizer, epoch):
-    lr = max(init_lr * (0.9 ** (epoch//10)), 0.0002)
+def adjust_learning_rate(init_lr, optimizer, iteration):
+    lr = max(init_lr * (0.9 ** (iteration//10)), 0.0002)
     for param_group in optimizer.param_groups:
         param_group["lr"] = lr
     return lr	

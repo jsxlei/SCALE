@@ -7,11 +7,12 @@
 # Description:
 
 """
-
+import time
 import os
 import numpy as np
 import pandas as pd
-import scipy
+import scipy.io
+import csv
 from sklearn.preprocessing import LabelEncoder
 
 import torch
@@ -22,17 +23,14 @@ class SingleCellDataset(Dataset):
     Single-cell dataset
     """
 
-    def __init__(self, data_file,
-                 celltype_file = None,
+    def __init__(self, path, 
+                 X = 0,
                  transforms=[]):
-
-        self.data_file = data_file
-        self.celltype_file = celltype_file
-        if self.check_exist_file():
-            self.data, self.celltype = self.load_processed_data()
-        else:
-            self.data, self.celltype = self.process()
-            
+        
+        self.load_data(path)
+        
+        if X>0:
+            self.filter_peak(X)
         for transform in transforms:
             self.data = transform(self.data)
         
@@ -43,74 +41,67 @@ class SingleCellDataset(Dataset):
         return self.data.shape[0]
 
     def __getitem__(self, index):
-        data = self.data[index]
-        if self.celltype is None:
-            return data
-        else:
-            celltype = self.celltype[index]
-            return data, celltype
-
-    def check_exist_file(self):
-        if not os.path.exists(self.data_file):
-            print('Error: No such file: {}'.format(self.data_file))
-            return False
-        if self.celltype_file is not None:
-            if not os.path.exists(self.celltype_file):
-                print('Error: No such file: {}'.format(self.celltype_file))
-                return False
-        return True
+        data = self.data[index];
+        if type(data) is not np.ndarray:
+            data = data.toarray().squeeze()
+        return data
     
-    def load_processed_data(self):
-        print("Loading processed data ...")
+    def load_data(self, path):
+        print("Loading  data ...")
+        t0 = time.time()
+        exist_file = False
+        for data_file in ['data.txt', 'data.txt.gz', 'data.mtx', 'data.mtx.gz']:
+            data_file = os.path.join(path, data_file)
+            if os.path.exists(data_file):
+                if 'txt' in data_file:
+                    data = pd.read_csv(data_file, sep='\t', index_col=0).T
+                    self.peaks = data.columns.values
+                    self.cell_id = data.index.values
+                    self.data = data.values
+                    self.dense = True
+                elif 'mtx' in data_file:
+                    self.data = scipy.io.mmread(data_file).T.tocsr()
+                    peaks = pd.read_csv(os.path.join(path, 'peaks.txt'), sep='\t', header=None)
+                    peaks = peaks[0].astype('str') + '_' + peaks[1].astype('str') + '_' + peaks[2].astype('str')
+                    self.peaks = peaks.values
+                    self.cell_id = [row[0] for row in csv.reader(
+                        open(os.path.join(path, 'cell_id.txt')), delimiter="\t")]
+                    self.peaks, self.cell_id = np.array(self.peaks), np.array(self.cell_id)
+                    self.dense = False
+                exist_file = True
+                break
+                
+        self.load_celltype(os.path.join(path, 'labels.txt'))
+                
+        if not exist_file:
+            raise "Error: No data.txt or data.txt.gz file in {}".format(path)
+            
+        print("Finished loading takes {:.2f} min".format((time.time()-t0)/60))
         
-        data = pd.read_csv(self.data_file, sep='\t', index_col=0).T
-        self.peaks = data.columns.values
-        self.sample_id = data.index.values
-        
-        if self.celltype_file is not None:
-            celltype = pd.read_csv(self.celltype_file, sep='\t', header=None, index_col=0)[1].values
+    def load_celltype(self, celltype_file):
+        if os.path.isfile(celltype_file):
+            celltype = pd.read_csv(celltype_file, sep='\t', header=None, index_col=0)[1].values
             encoder = LabelEncoder()
-            celltype = encoder.fit_transform(celltype)
+            self.celltype = encoder.fit_transform(celltype)
             self.CellType = encoder.classes_
             self.n_celltype = len(self.CellType)
         else:
-            celltype = None
-            
-        print("Finished loading!")
-        
-        return data.values, celltype
-        
-    def downsampling_cell(self, size=1., seed=124):
-        size = int(size * self.n_cells) if type(size) is not int else size
-        np.random.seed(seed)
-        indices = np.random.choice(self.n_cells, size=size, replace=False)
-        return indices
+            self.celltype = None
     
     def info(self):
         print("\n===========================")
         print("Dataset Info")
         print('Cell number: {}\nPeak number: {}'.format(self.n_cells, self.n_peaks))
         print('===========================\n')
-
-    def process(self):
-        raise NotImplementedError
         
-    def peak_filter(self, X=4, inplace=True):
+    def filter_peak(self, X=4):
         """
-        Similar to Gene filter in SC3:
-            Removes peaks that are either (1) or (2)
-            (1). rare peaks:
-                Peaks (signal > 0) in less than X% of cells 
-            (2). ubiquitous peaks:
-                Peaks (signal > 0) in at least (100 - X)% of cells
-        Input data:
-            data is an array of shape (n_peak, n_cell)
+        Removes rare peaks with (signal > 0) in less than X% of cells 
         """
-        total_cells = self.data.shape[1]
-        count = (self.data >0).sum(0); print(count.shape)
-        indices1 = np.where(count > 0.01*X*total_cells)[0]
-        indices2 = np.where(count < 0.01*(100-X)*total_cells)[0]
-        indices = set(indices1) & set(indices2)
+        total_cells = self.data.shape[0]
+        
+        count = np.array((self.data >0).sum(0)).squeeze()
+        indices = np.where(count > 0.01*X*total_cells)[0]
         self.data = self.data[:, indices]
         self.peaks = self.peaks[indices]
         

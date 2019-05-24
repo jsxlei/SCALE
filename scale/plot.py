@@ -97,7 +97,7 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
     plt.show()
 
 
-def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None, 
+def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None, row_cluster=False,
                  cax_title='', xlabel='', ylabel='', yticklabels='', legend_font=10, 
                  show_legend=True, show_cax=True, tick_color='black', ncol=3,
                  bbox_to_anchor=(0.5, 1.3), position=(0.8, 0.78, .1, .04), return_grid=False,
@@ -146,6 +146,7 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
     cbar_kws={"orientation": "horizontal"}
     grid = sns.clustermap(X, yticklabels=True, 
             col_cluster=False,
+            row_cluster=row_cluster,
             cbar_kws=cbar_kws, **kw)
     if show_cax:
         grid.cax.set_position(position)
@@ -183,8 +184,11 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
         return grid
 
 
-def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize=(4, 4), markersize=10,
+def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize=(4, 4), markersize=1, marker=None,
                    return_emb=False, save=False, save_emb=False, show_legend=True, show_axis_label=True, **legend_params):
+    if marker is not None:
+        X = np.concatenate([X, marker], axis=0)
+    N = len(labels)
     if X.shape[1] != 2:
         if method == 'tSNE':
             from sklearn.manifold import TSNE
@@ -211,7 +215,9 @@ def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize
     colors = sns.color_palette(cmap, n_colors=len(classes))
         
     for i, c in enumerate(classes):
-        plt.scatter(X[labels==c, 0], X[labels==c, 1], s=markersize, color=colors[i], label=c)
+        plt.scatter(X[:N][labels==c, 0], X[:N][labels==c, 1], s=markersize, color=colors[i], label=c)
+    if marker is not None:
+        plt.scatter(X[N:, 0], X[N:, 1], s=40*markersize, color='black', marker='*')
 #     plt.axis("off")
     
     legend_params_ = {'loc': 'center left',
@@ -230,9 +236,6 @@ def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize
         plt.ylabel(method+' dim 2', fontsize=12)
 
     if save:
-#         if os.path.isfile(save):
-#             print('remove previous figure {}'.format(save))
-#             os.remove(save)
         plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()

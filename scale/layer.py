@@ -77,10 +77,10 @@ class Decoder(nn.Module):
 
         [z_dim, h_dim, x_dim] = dims
 
-        # self.hidden = build_mlp([z_dim, *h_dim], bn=bn, dropout=dropout)
-        self.hidden = build_mlp([z_dim]+h_dim, bn=bn, dropout=dropout)
-        # self.reconstruction = nn.Linear([z_dim, *h_dim][-1], x_dim)
-        self.reconstruction = nn.Linear(([z_dim]+h_dim)[-1], x_dim)
+        self.hidden = build_mlp([z_dim, *h_dim], bn=bn, dropout=dropout)
+#         self.hidden = build_mlp([z_dim]+h_dim, bn=bn, dropout=dropout)
+        self.reconstruction = nn.Linear([z_dim, *h_dim][-1], x_dim)
+#         self.reconstruction = nn.Linear(([z_dim]+h_dim)[-1], x_dim)
 
         self.output_activation = output_activation
 
@@ -127,12 +127,12 @@ class Stochastic(nn.Module):
     parametrised by mu and log_var.
     """
     def reparametrize(self, mu, logvar):
-        if self.training:
-            std = torch.exp(0.5*logvar)
-            eps = torch.randn_like(std)
-            return eps.mul(std).add_(mu).float()
-        else:
-            return mu.float()
+        epsilon = torch.randn(mu.size(), requires_grad=False, device=mu.device)
+        std = logvar.mul(0.5).exp_()
+#         std = torch.clamp(logvar.mul(0.5).exp_(), -5, 5)
+        z = mu.addcmul(std, epsilon)
+
+        return z
 
 class GaussianSample(Stochastic):
     """
