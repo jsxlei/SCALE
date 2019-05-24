@@ -23,9 +23,9 @@ Installation only requieres a few minutes.
 
 #### Quick Start
 
-Run SCALE on count matrix file: 
+Run SCALE on scATAC-seq input dir contain: 
 * dense matrix: data.txt/data.txt.gz
-* sparse matrix: data.mtx/data.mtx.gz, peaks.txt and cell_id.txt
+* sparse matrix: data.mtx/data.mtx.gz, with peaks.txt and cell_id.txt
 
 Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
 
