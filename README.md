@@ -34,6 +34,8 @@ Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/2197
 Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset:
 	
 	SCALE.py -d mouse_atlas -k 30 -x 4
+	
+![](docs/png/mouse_atlas.png)
 
 cluster number k will be estimated if k is not provided: 
 
