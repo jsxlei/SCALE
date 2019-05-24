@@ -29,7 +29,7 @@ Run SCALE on count matrix file:
 
 Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
 
-	SCALE.py -d Forebrain -k 6
+	SCALE.py -d Forebrain -k 8
 	
 Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset:
 	
