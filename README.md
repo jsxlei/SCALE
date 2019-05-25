@@ -12,8 +12,8 @@ Running SCALE on CUDA is recommended if available.
 	
 #### install from GitHub
 
-    	git clone git://github.com/jsxlei/SCALE.git
-    	cd SCALE
+	git clone git://github.com/jsxlei/SCALE.git
+	cd SCALE
 	python setup.py install
     
 Installation only requieres a few minutes.
