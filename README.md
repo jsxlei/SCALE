@@ -12,32 +12,32 @@ Running SCALE on CUDA is recommended if available.
 	
 #### install from GitHub
 
-    git clone git://github.com/jsxlei/SCALE.git
-    cd SCALE
-    python setup.py install
+    	git clone git://github.com/jsxlei/SCALE.git
+    	cd SCALE
+	python setup.py install
     
 Installation only requieres a few minutes.
 
 
 ## Quick Start
 
-Run SCALE on scATAC-seq input dir contain: 
-* dense matrix: **data.txt** / **data.txt.gz**
-* sparse matrix: **data.mtx** / **data.mtx.gz**, with peaks.txt and cell_id.txt
+Input scATAC-seq data should be one of: 
+* **dense matrix**: **data.txt** / **data.txt.gz**
+* **sparse matrix**: **data.mtx** / **data.mtx.gz**, with **peaks.txt** and **cell_id.txt**
 
-Run SCALE on dense matrix, e.g. **[Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/)** dataset:  
+#### Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
 
 	SCALE.py -d Forebrain -k 8
 
 ![](docs/png/Forebrain.png)
 	
-Run SCALE on sparse matrix, e.g. **[Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)** dataset:
+#### Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (~80,000 cells):
 	
 	SCALE.py -d mouse_atlas -k 30 -x 4
 	
 ![](docs/png/mouse_atlas.png)
 
-cluster number k will be estimated if k is not provided: 
+#### Run SCALE without providing cluster number k: 
 
 	SCALE.py -d [input_dir]
 
