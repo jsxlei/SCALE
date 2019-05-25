@@ -5,17 +5,16 @@ Single-Cell ATAC-seq analysis via Latent feature Extraction
 
 SCALE neural network is implemented in [Pytorch](https://pytorch.org/) framework.  
 Running SCALE on CUDA is recommended if available.   
+
+#### 1. install via pip:
+
+	pip install scale-atac
 	
-Currently, SCALE requires Python 3.6+ and does not work with Python 2.7
-
-#### Installation from GitHub
-
-To clone the repository and install manually, run the following from a terminal:
+#### 2. install from GitHub
 
     git clone git://github.com/jsxlei/SCALE.git
     cd SCALE
-    pip install -r requirements.txt
-    python setup.py install --user
+    python setup.py install
     
 Installation only requieres a few minutes.
 
