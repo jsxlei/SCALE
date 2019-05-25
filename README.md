@@ -1,16 +1,16 @@
 # SCALE
 Single-Cell ATAC-seq analysis via Latent feature Extraction
 
-### Installation  
+## Installation  
 
 SCALE neural network is implemented in [Pytorch](https://pytorch.org/) framework.  
 Running SCALE on CUDA is recommended if available.   
 
-#### 1. install via pip:
+#### install via pip:
 
 	pip install scale-atac
 	
-#### 2. install from GitHub
+#### install from GitHub
 
     git clone git://github.com/jsxlei/SCALE.git
     cd SCALE
@@ -18,21 +18,20 @@ Running SCALE on CUDA is recommended if available.
     
 Installation only requieres a few minutes.
 
-### Usage
 
-#### Quick Start
+## Quick Start
 
 Run SCALE on scATAC-seq input dir contain: 
-* dense matrix: data.txt/data.txt.gz
-* sparse matrix: data.mtx/data.mtx.gz, with peaks.txt and cell_id.txt
+* dense matrix: **data.txt** / **data.txt.gz**
+* sparse matrix: **data.mtx** / **data.mtx.gz**, with peaks.txt and cell_id.txt
 
-Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset:  
+Run SCALE on dense matrix, e.g. **[Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/)** dataset:  
 
 	SCALE.py -d Forebrain -k 8
 
 ![](docs/png/Forebrain.png)
 	
-Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset:
+Run SCALE on sparse matrix, e.g. **[Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)** dataset:
 	
 	SCALE.py -d mouse_atlas -k 30 -x 4
 	
