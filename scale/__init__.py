@@ -7,6 +7,11 @@
 # Description:
 
 """
+
+__author__ = "Lei Xiong"
+__email__ = "jsxlei@gmail"
+__version__ = '1.0.2'
+
 from .layer import *
 from .model import *
 from .loss import *
