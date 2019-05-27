@@ -25,21 +25,13 @@ Input scATAC-seq data should be one of:
 * **dense matrix**: **data.txt** / **data.txt.gz**
 * **sparse matrix**: **data.mtx** / **data.mtx.gz**, with **peaks.txt** and **cell_id.txt**
 
-#### Run SCALE without providing cluster number k: 
+#### Run SCALE with provided cluster number k if k is known:  
 
-	SCALE.py -d [input_dir]
+    SCALE.py -d [input_dir] -k [k]
 
-#### Run SCALE on dense matrix, e.g. [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset (k=8):  
+#### Or Run SCALE with estimated k: 
 
-	SCALE.py -d Forebrain -k 8
-
-![](https://github.com/jsxlei/SCALE/blob/master/docs/png/Forebrain.png)
-	
-#### Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (k=30, ~80,000 cells):
-	
-	SCALE.py -d mouse_atlas -k 30 -x 4
-	
-![](https://github.com/jsxlei/SCALE/blob/master/docs/png/mouse_atlas.png)
+    SCALE.py -d [input_dir]
 
 
 #### Useful options  
@@ -54,7 +46,7 @@ Input scATAC-seq data should be one of:
 #### Note    
 If come across the nan loss, 
 * try another random seed
-* filter peaks with harsh threshold like -x 4 or -x 6
+* filter peaks with harsher threshold like -x 4 or -x 6
 * change the initial learning rate to 0.0002 
 	
 #### Results
@@ -84,8 +76,16 @@ Use functions in SCALE packages.
   <img src="https://github.com/jsxlei/SCALE/blob/master/docs/png/memory.png" width="400" /> 
 </p>
 
-#### Tutorials
+## Tutorial
 
+#### Run SCALE on dense matrix, e.g. [Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain) dataset (k=8, 2088 cells):  
 
-### Documentation
+	SCALE.py -d Forebrain -k 8
 
+![](https://github.com/jsxlei/SCALE/blob/master/docs/png/Forebrain.png)
+	
+#### Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas) dataset (k=30, ~80,000 cells):
+	
+	SCALE.py -d mouse_atlas -k 30 -x 4
+	
+![](https://github.com/jsxlei/SCALE/blob/master/docs/png/mouse_atlas.png)
