@@ -145,8 +145,7 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
 
     Input:
         weight: weight of decoder
-        weight_index_file: weight_index.txt, match to original peaks index of data for weight index, 
-                           because saved weight index is disorder result by sort_by_mad operation. 
+        weight_index: original peak/gene index. 
         kind: both for both side, pos for positive side and neg for negative side.
         cutoff: cutoff of standard deviations from mean.
     """
