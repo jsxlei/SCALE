@@ -1,5 +1,6 @@
 # SCALE
 Single-Cell ATAC-seq analysis via Latent feature Extraction
+![](docs/png/model.png)
 
 ## Installation  
 
@@ -85,16 +86,7 @@ Use functions in SCALE packages.
 </p>
 
 #### Tutorials
-A demo on SCALE usage for single-cell ATAC-seq data can be found in this notebook: 
-https://github.com/jsxlei/SCALE/tree/master/notebooks/tutorial.ipynb
 
 
 ### Documentation
 
-* [Preprocessing](docs/preprocessing.md)
-* [Model introduction](docs/model_introduction.md)
-* [Inputs and Outputs](docs/inputs_and_outputs.md)
-* [Feature embedding](docs/feature_embedding.md)
-* [Cluster_assignments](docs/cluster_assignments.md)
-* [Denoising and Imputation](docs/denoising_and_imputation.md)
-* [Cell type specific elements](docs/cell_type_specific_elements.md)
