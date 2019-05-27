@@ -145,7 +145,7 @@ def peak_selection(weight, weight_index, kind='both', cutoff=2.5):
 
     Input:
         weight: weight of decoder
-        weight_index: original peak/gene index. 
+        weight_index: generated peak/gene index. 
         kind: both for both side, pos for positive side and neg for negative side.
         cutoff: cutoff of standard deviations from mean.
     """
