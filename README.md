@@ -1,5 +1,5 @@
 # Single-Cell ATAC-seq analysis via Latent feature Extraction
-![](docs/png/model.png)
+![](https://github.com/jsxlei/SCALE/blob/master/docs/png/model.png)
 
 ## Installation  
 
@@ -33,13 +33,13 @@ Input scATAC-seq data should be one of:
 
 	SCALE.py -d Forebrain -k 8
 
-![](docs/png/Forebrain.png)
+![](https://github.com/jsxlei/SCALE/blob/master/docs/png/Forebrain.png)
 	
 #### Run SCALE on sparse matrix, e.g. [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (k=30, ~80,000 cells):
 	
 	SCALE.py -d mouse_atlas -k 30 -x 4
 	
-![](docs/png/mouse_atlas.png)
+![](https://github.com/jsxlei/SCALE/blob/master/docs/png/mouse_atlas.png)
 
 
 #### Useful options  
@@ -80,8 +80,8 @@ Use functions in SCALE packages.
 	
 #### Running time
 <p float="left">
-  <img src="docs/png/runtime.png" width="400" />
-  <img src="docs/png/memory.png" width="400" /> 
+  <img src="https://github.com/jsxlei/SCALE/blob/master/docs/png/runtime.png" width="400" />
+  <img src="https://github.com/jsxlei/SCALE/blob/master/docs/png/memory.png" width="400" /> 
 </p>
 
 #### Tutorials
