@@ -1,5 +1,4 @@
-# SCALE
-Single-Cell ATAC-seq analysis via Latent feature Extraction
+# Single-Cell ATAC-seq analysis via Latent feature Extraction
 ![](docs/png/model.png)
 
 ## Installation  
