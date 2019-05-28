@@ -104,8 +104,8 @@ if __name__ == '__main__':
                   verbose=args.verbose,
                   device = device,
                   max_iter=args.max_iter,
-                  n=args.n,
-                  beta=args.beta,
+#                   n=args.n,
+#                   beta=args.beta,
                   name=name
                    )
         print('\nRunning Time: {:.2f} s'.format((time.time()-t0)/60))
