@@ -77,16 +77,6 @@ Use functions in SCALE packages.
 ## Tutorial
 
 
-### [Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)  
-Run SCALE on dense matrix [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset (k=8, 2088 cells):  
-
-	SCALE.py -d Forebrain -k 8
-
-![](https://github.com/jsxlei/SCALE/blob/master/docs/png/Forebrain.png)
+**[Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)**   Run SCALE on dense matrix [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset (k=8, 2088 cells)
 	
-### [Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)  
-Run SCALE on sparse matrix [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (k=30, ~80,000 cells):
-	
-	SCALE.py -d mouse_atlas -k 30 -x 4
-	
-![](https://github.com/jsxlei/SCALE/blob/master/docs/png/mouse_atlas.png)
+**[Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)**   Run SCALE on sparse matrix [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (k=30, ~80,000 cells)
