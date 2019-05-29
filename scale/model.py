@@ -116,7 +116,8 @@ class VAE(nn.Module):
             n = 200,
             max_iter=30000,
             verbose=True,
-            name=''
+            name='',
+            patience=10,
        ):
 
         self.to(device)
@@ -124,8 +125,10 @@ class VAE(nn.Module):
         Beta = DeterministicWarmup(n=n, t_max=beta)
         
         iteration = 0
+        early_stopping = EarlyStopping(patience=patience)
         with trange(max_iter, disable=verbose) as pbar:
-            while True:    
+            while True: 
+                epoch_loss = 0
                 for i, x in enumerate(dataloader):
                     epoch_lr = adjust_learning_rate(lr, optimizer, iteration)
                     t0 = time.time()
@@ -137,7 +140,8 @@ class VAE(nn.Module):
                     loss.backward()
                     optimizer.step()
                     
-                    pbar.set_description('{} [loss]{:.3f}  [recon_loss]{:.3f} [kl_loss]{:.3f}'.format(
+                    epoch_loss += loss.item()
+                    pbar.set_description('{} [loss]{:.3f} [recon_loss]{:.3f} [kl_loss]{:.3f}'.format(
                             name, loss, recon_loss/len(x), kl_loss/len(x)))
                     pbar.update(1)
                     
@@ -145,6 +149,10 @@ class VAE(nn.Module):
                     if iteration >= max_iter:
                         break
                 else:
+                    early_stopping(epoch_loss, self)
+                    if early_stopping.early_stop:
+                        print('EarlyStopping: run {} iteration'.format(iteration))
+                        break
                     continue
                 break
 
@@ -228,3 +236,49 @@ def adjust_learning_rate(init_lr, optimizer, iteration):
         param_group["lr"] = lr
     return lr	
 
+
+import os
+class EarlyStopping:
+    """Early stops the training if loss doesn't improve after a given patience."""
+    def __init__(self, patience=10, verbose=False):
+        """
+        Args:
+            patience (int): How long to wait after last time loss improved.
+                            Default: 10
+            verbose (bool): If True, prints a message for each loss improvement. 
+                            Default: False
+        """
+        self.patience = patience
+        self.verbose = verbose
+        self.counter = 0
+        self.best_score = None
+        self.early_stop = False
+        self.loss_min = np.Inf
+
+    def __call__(self, loss, model):
+        if np.isnan(loss):
+            self.early_stop = True
+        score = -loss
+
+        if self.best_score is None:
+            self.best_score = score
+            self.save_checkpoint(loss, model)
+        elif score < self.best_score:
+            self.counter += 1
+            if self.verbose:
+                print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
+            if self.counter >= self.patience:
+                self.early_stop = True
+                model.load_model('checkpoint.pt')
+                os.remove('checkpoint.pt')
+        else:
+            self.best_score = score
+            self.save_checkpoint(loss, model)
+            self.counter = 0
+
+    def save_checkpoint(self, loss, model):
+        '''Saves model when loss decrease.'''
+        if self.verbose:
+            print(f'Loss decreased ({self.loss_min:.6f} --> {loss:.6f}).  Saving model ...')
+        torch.save(model.state_dict(), 'checkpoint.pt')
+        self.loss_min = loss
