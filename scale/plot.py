@@ -56,7 +56,7 @@ def plot_confusion_matrix(cm, x_classes=None, y_classes=None,
 
 
     if normalize:
-        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        cm = cm.astype('float') / cm.sum(axis=0)[np.newaxis, :]
 
     fig = plt.figure(figsize=figsize)
     plt.imshow(cm, interpolation='nearest', cmap=cmap)
