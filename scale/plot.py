@@ -161,9 +161,9 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
                                frameon=False, 
                                ncol=ncol)
         grid.ax_col_colors.tick_params(labelsize=6, length=0, labelcolor='orange')
-    if 'row_cluster' in kw:
-        if (row_cluster==True) and (yticklabels is not ''):
-            yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
+ 
+    if (row_cluster==True) and (yticklabels is not ''):
+        yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
 
     grid.ax_heatmap.set_xlabel(xlabel)
     grid.ax_heatmap.set_ylabel(ylabel, fontsize=8)
