@@ -353,6 +353,7 @@ def feature_specifity(feature, ref, classes, figsize=(6,6), save=None):
     else:
         plt.show()
         
+import os     
 from .utils import read_labels, reassign_cluster_with_ref
 from sklearn.metrics import f1_score, normalized_mutual_info_score, adjusted_rand_score
 
@@ -366,7 +367,6 @@ def lineplot(data, name, title='', cbar=False):
     plt.show()
     
 def plot_metrics(path, dataset, ref, fraction):
-    print('=========', dataset, '=========')
     ARI = []
     NMI = []
     F1 = []
@@ -378,7 +378,6 @@ def plot_metrics(path, dataset, ref, fraction):
             SC3_pred, _ = read_labels(os.path.join(outdir, 'SC3_predict.txt'))
         else:
             SC3_pred = None
-            print('There is no {}'.format(os.path.join(outdir, 'SC3_predict.txt')))
         scVI_pred, _ = read_labels(os.path.join(outdir, 'scVI_predict.txt'))
         scale_pred, pred_classes = read_labels(os.path.join(outdir, 'cluster_assignments.txt'))
         
