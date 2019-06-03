@@ -352,6 +352,63 @@ def feature_specifity(feature, ref, classes, figsize=(6,6), save=None):
         plt.savefig(save, format='pdf', bbox_inches='tight')
     else:
         plt.show()
+        
+from .utils import read_labels, reassign_cluster_with_ref
+from sklearn.metrics import f1_score, normalized_mutual_info_score, adjusted_rand_score
 
-
+def lineplot(data, name, title='', cbar=False):
+    sns.lineplot(x='fraction', y=name, hue='method', data=data, markers=True, style='method', sort=False)
+    plt.title(title)
+    if cbar:
+        plt.legend(loc='right', bbox_to_anchor=(1.25, 0.2), frameon=False)
+    else:
+        plt.legend().set_visible(False)
+    plt.show()
+    
+def plot_metrics(path, dataset, ref, fraction):
+    print('=========', dataset, '=========')
+    ARI = []
+    NMI = []
+    F1 = []
+    methods = ['scABC', 'SC3', 'scVI', 'SCALE']
+    for frac in fraction:
+        outdir = os.path.join(path, dataset, frac) #;print(outdir)
+        scABC_pred, _ = read_labels(os.path.join(outdir, 'scABC_predict.txt'))
+        if os.path.isfile(os.path.join(outdir, 'SC3_predict.txt')):
+            SC3_pred, _ = read_labels(os.path.join(outdir, 'SC3_predict.txt'))
+        else:
+            SC3_pred = None
+            print('There is no {}'.format(os.path.join(outdir, 'SC3_predict.txt')))
+        scVI_pred, _ = read_labels(os.path.join(outdir, 'scVI_predict.txt'))
+        scale_pred, pred_classes = read_labels(os.path.join(outdir, 'cluster_assignments.txt'))
+        
+        ari = []
+        nmi = []
+        f1 = []
+        for pred, method in zip([scABC_pred, SC3_pred, scVI_pred, scale_pred], methods):
+            if pred is None:
+                ari.append(0)
+                nmi.append(0)
+                f1.append(0)
+            else:
+                pred = reassign_cluster_with_ref(pred, ref)
+                ari.append(adjusted_rand_score(ref, pred))
+                nmi.append(normalized_mutual_info_score(ref, pred))
+                f1.append(f1_score(ref, pred, average='micro'))
+        ARI.append(ari)
+        NMI.append(nmi)
+        F1.append(f1)
+    fraction = [ frac.replace('corrupt_', '') for frac in fraction]
+    ARI = pd.Series(np.concatenate(ARI, axis=0))
+    NMI = pd.Series(np.concatenate(NMI, axis=0))
+    F1 = pd.Series(np.concatenate(F1, axis=0))
+    M = pd.Series(methods * len(fraction))
+    F = pd.Series(np.concatenate([[i]*len(methods) for i in fraction]))
+    
+    metrics = pd.concat([ARI, NMI, F1, M, F], axis=1)
+    metrics.columns = ['ARI', 'NMI', 'F1', 'method', 'fraction']
+    
+    lineplot(metrics, 'ARI', dataset, False)
+    lineplot(metrics, 'NMI', dataset, False)
+    lineplot(metrics, 'F1', dataset, True)
 
