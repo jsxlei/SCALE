@@ -184,7 +184,7 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
         return grid
 
 
-def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize=(4, 4), markersize=1, marker=None,
+def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize=(4, 4), markersize=4, marker=None,
                    return_emb=False, save=False, save_emb=False, show_legend=True, show_axis_label=True, **legend_params):
     if marker is not None:
         X = np.concatenate([X, marker], axis=0)
@@ -217,7 +217,7 @@ def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize
     for i, c in enumerate(classes):
         plt.scatter(X[:N][labels==c, 0], X[:N][labels==c, 1], s=markersize, color=colors[i], label=c)
     if marker is not None:
-        plt.scatter(X[N:, 0], X[N:, 1], s=40*markersize, color='black', marker='*')
+        plt.scatter(X[N:, 0], X[N:, 1], s=10*markersize, color='black', marker='*')
 #     plt.axis("off")
     
     legend_params_ = {'loc': 'center left',
