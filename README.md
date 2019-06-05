@@ -30,7 +30,7 @@ Input scATAC-seq data should be one of:
     SCALE.py -d [input_dir]
 
 #### Data availability  
-Download all the **[provided datasets](https://cloud.tsinghua.edu.cn/d/b0711f8e7b1946e7b186/)** and **[mouse_atlas dataset](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)**
+Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/b0711f8e7b1946e7b186/) and **mouse_atlas dataset** [[Download]](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)
 
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
@@ -77,6 +77,6 @@ Use functions in SCALE packages.
 ## Tutorial
 
 
-**[Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)**   Run SCALE on dense matrix [Forebrain](https://cloud.tsinghua.edu.cn/d/21975230039b46b8890e/) dataset (k=8, 2088 cells)
+**[Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)**   Run SCALE on dense matrix **Forebrain** dataset (k=8, 2088 cells)
 	
-**[Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)**   Run SCALE on sparse matrix [Mouse Atlas](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/) dataset (k=30, ~80,000 cells)
+**[Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)**   Run SCALE on sparse matrix **Mouse Atlas** dataset (k=30, ~80,000 cells)
