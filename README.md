@@ -30,7 +30,7 @@ Input scATAC-seq data should be one of:
     SCALE.py -d [input_dir]
 
 #### Data availability  
-Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/b0711f8e7b1946e7b186/) and **mouse_atlas dataset** [[Download]](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)
+Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/b0711f8e7b1946e7b186/) and **Mouse Atlas dataset** [[Download]](https://cloud.tsinghua.edu.cn/d/cd5ea4ea93c04513966f/)
 
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
