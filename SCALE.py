@@ -96,7 +96,6 @@ if __name__ == '__main__':
 
     if not args.pretrain:
         print('\n## Training Model ##')
-        t0 = time.time()
         model.init_gmm_params(testloader)
         model.fit(trainloader,
                   lr=lr, 
@@ -108,7 +107,6 @@ if __name__ == '__main__':
 #                   beta=args.beta,
                   name=name
                    )
-        print('\nRunning Time: {:.2f} s'.format((time.time()-t0)/60))
     else:
         print('\n## Loading Model {} ##\n'.format(args.pretrain))
         model.load_model(args.pretrain)
