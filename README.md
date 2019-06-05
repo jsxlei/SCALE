@@ -70,8 +70,8 @@ Use functions in SCALE packages.
 	
 #### Running time
 <p float="left">
-  <img src="https://github.com/jsxlei/SCALE/wiki/png/runtime.png" width="400" />
-  <img src="https://github.com/jsxlei/SCALE/wiki/png/memory.png" width="400" /> 
+  <img src="https://github.com/jsxlei/SCALE/wiki/png/runtime.png" width="350" />
+  <img src="https://github.com/jsxlei/SCALE/wiki/png/memory.png" width="350" /> 
 </p>
 
 ## Tutorial
