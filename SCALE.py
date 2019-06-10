@@ -143,7 +143,7 @@ if __name__ == '__main__':
         recon_x.to_csv(os.path.join(outdir, 'imputed_data.txt'), sep='\t') 
 
         torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
-        np.savetxt(os.path.join(args.outdir, 'mu_c.txt'), model.mu_c.cpu().detach().numpy())
+#         np.savetxt(os.path.join(args.outdir, 'mu_c.txt'), model.mu_c.cpu().detach().numpy())
 
         from scale.plot import plot_embedding
         plot_embedding(feature, y, #marker=model.mu_c.cpu().detach().numpy().T, 
