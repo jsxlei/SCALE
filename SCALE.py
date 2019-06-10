@@ -26,6 +26,7 @@ import gc
 from scale import SCALE
 from scale.dataset import SingleCellDataset
 from scale.utils import read_labels, cluster_report, estimate_k, binarization
+from scale.plot import plot_embedding
 
 from sklearn.preprocessing import MaxAbsScaler
 from torch.utils.data import DataLoader
@@ -143,7 +144,6 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     
     if not args.no_tsne:
-        from scale.plot import plot_embedding
         plot_embedding(feature, pred, 
                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         
