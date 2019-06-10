@@ -144,6 +144,7 @@ if __name__ == '__main__':
     torch.cuda.empty_cache()
     
     if not args.no_tsne:
+        print("Plot tsne embedding")
         plot_embedding(feature, pred, 
                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         
