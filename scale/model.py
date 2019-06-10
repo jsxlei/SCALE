@@ -142,8 +142,8 @@ class VAE(nn.Module):
                     optimizer.step()
                     
                     epoch_loss += loss.item()
-                    pbar.set_description('{} [loss]{:.3f} [recon_loss]{:.3f} [kl_loss]{:.3f}'.format(
-                            name, loss, recon_loss/len(x), kl_loss/len(x)))
+                    pbar.set_description('[loss]{:.3f} [recon_loss]{:.3f} [kl_loss]{:.3f}'.format(
+                            loss, recon_loss/len(x), kl_loss/len(x)))
                     pbar.update(1)
                     
                     iteration+=1
