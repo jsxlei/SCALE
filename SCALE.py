@@ -123,7 +123,7 @@ if __name__ == '__main__':
         
         # 2. cluster assignments
         pred = model.predict(testloader, device)
-        pd.Series(pred).to_csv(os.path.join(outdir, 'cluster_assignments.txt'), sep='\t', header=False)
+        pd.Series(pred, index=dataset.cell_id).to_csv(os.path.join(outdir, 'cluster_assignments.txt'), sep='\t', header=False)
                                
         # gmm_pred = model.predict(testloader, device, method='gmm')
         # pd.Series(gmm_pred).to_csv(os.path.join(outdir, 'gmm_predict.txt'), sep='\t', header=False)
