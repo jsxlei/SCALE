@@ -90,24 +90,6 @@ def sample_filter(data, x=10, n_reads=2):
 
 # =================== Other ====================
 # ==============================================
-# def filter_peaks(data, X=5):
-#     """
-#     data n_cells x n_peaks
-#     """
-#     total_cells = data.shape[0]
-#     count = np.array((data >0).sum(0)).squeeze()
-#     indices = np.where(count > 0.01*X*total_cells)[0]
-#     data = data[:, indices]
-#     return data
-
-# def filter_cells(data):
-#     """
-#     data n_cells x n_peaks
-#     """
-#     count = np.array((data>0).sum(1)).squeeze()
-#     indices = np.where(count>np.quantile(count, 0.1))[0]
-#     data = data[indices]
-#     return data
 
 def estimate_k(data):
     """
@@ -116,8 +98,10 @@ def estimate_k(data):
         input data is (p,n) matrix, p is feature, n is sample
     """
     p, n = data.shape
-
-    x = scale(data)
+    if type(data) is not np.ndarray:
+        x = scale(data, with_mean=False)
+    else:
+        x = scale(data)
     muTW = (np.sqrt(n-1) + np.sqrt(p)) ** 2
     sigmaTW = (np.sqrt(n-1) + np.sqrt(p)) * (1/np.sqrt(n-1) + 1/np.sqrt(p)) ** (1/3)
     sigmaHatNaive = x.T.dot(x)
