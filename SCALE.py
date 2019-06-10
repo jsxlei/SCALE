@@ -8,7 +8,7 @@
     Input: 
         scATAC-seq data
     Output:
-        1. latent GMM feature
+        1. latent feature
         2. cluster assignment
         3. imputation data
 """
@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 import os
 import argparse
+import gc
 
 from scale import SCALE
 from scale.dataset import SingleCellDataset
@@ -36,7 +37,6 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', '-d', type=str, help='input dataset path')
     parser.add_argument('--n_centroids', '-k', type=int, help='cluster number')
     parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
-    parser.add_argument('--no_results', action='store_true', help='Not Save the results')
     parser.add_argument('--binary', action='store_true', help='Transform imputed data to binary values')
     parser.add_argument('--verbose', action='store_true', help='Print loss of training process')
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
@@ -51,6 +51,8 @@ if __name__ == '__main__':
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')
     parser.add_argument('--weight_decay', type=float, default=5e-4)
+    parser.add_argument('--no_impute', action='store_true', help='Not save the imputed data')
+    parser.add_argument('--no_tsne', action='store_true', help='Not save the tsne embedding')
 
     args = parser.parse_args()
 
@@ -113,37 +115,35 @@ if __name__ == '__main__':
         model.load_model(args.pretrain)
         model.to(device)
 
-    if not args.no_results:
-        print('outidr: {}'.format(outdir))
+    ### output ###
+    print('outidr: {}'.format(outdir))
+    # 1. latent feature
+    feature = model.encodeBatch(testloader, device=device, out='z')
+    pd.DataFrame(feature).to_csv(os.path.join(outdir, 'feature.txt'), sep='\t', header=False)
 
-        ### output ###
-        # 1. latent GMM feature
-        feature = model.encodeBatch(testloader, device=device, out='z')
-        pd.DataFrame(feature).to_csv(os.path.join(outdir, 'feature.txt'), sep='\t', header=False)
-        
-        # 2. cluster assignments
-        pred = model.predict(testloader, device)
-        pd.Series(pred, index=dataset.cell_id).to_csv(os.path.join(outdir, 'cluster_assignments.txt'), sep='\t', header=False)
-                               
-        # gmm_pred = model.predict(testloader, device, method='gmm')
-        # pd.Series(gmm_pred).to_csv(os.path.join(outdir, 'gmm_predict.txt'), sep='\t', header=False)
-        
-        if dataset.celltype is not None:
-            y = dataset.CellType[dataset.celltype]
-        else:
-            y = pred
+    # 2. cluster assignments
+    pred = model.predict(testloader, device)
+    pd.Series(pred, index=dataset.cell_id).to_csv(os.path.join(outdir, 'cluster_assignments.txt'), sep='\t', header=False)
             
-        # 3. imputed data
+    # 3. imputed data
+    if not args.no_impute:
+        print("Saving imputed data")
         recon_x = model.encodeBatch(testloader, device, out='x', transforms=[normalizer.inverse_transform])
         recon_x = pd.DataFrame(recon_x.T, index=dataset.peaks, columns=dataset.cell_id)
         if args.binary:
             recon_x = binarization(recon_x, raw)
         recon_x.to_csv(os.path.join(outdir, 'imputed_data.txt'), sep='\t') 
-
-        torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
-#         np.savetxt(os.path.join(args.outdir, 'mu_c.txt'), model.mu_c.cpu().detach().numpy())
-
+        del recon_x
+        
+    torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
+    del dataset
+    del model
+        
+    gc.collect()
+    torch.cuda.empty_cache()
+    
+    if not args.no_tsne:
         from scale.plot import plot_embedding
-        plot_embedding(feature, y, #marker=model.mu_c.cpu().detach().numpy().T, 
+        plot_embedding(feature, pred, 
                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         
