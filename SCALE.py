@@ -82,6 +82,7 @@ if __name__ == '__main__':
     lr = args.lr
     name = args.dataset.strip('/').split('/')[-1]
     
+    outdir = args.outdir
     if not os.path.exists(outdir):
         os.makedirs(outdir)
         
@@ -114,7 +115,6 @@ if __name__ == '__main__':
         model.load_model(args.pretrain)
         model.to(device)
 
-    outdir = args.outdir
     if not args.no_results:
         print('outidr: {}'.format(outdir))
 
