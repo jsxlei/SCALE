@@ -118,6 +118,7 @@ class VAE(nn.Module):
             verbose=True,
             name='',
             patience=10,
+            outdir='./'
        ):
 
         self.to(device)
@@ -125,7 +126,7 @@ class VAE(nn.Module):
         Beta = DeterministicWarmup(n=n, t_max=beta)
         
         iteration = 0
-        early_stopping = EarlyStopping(patience=patience)
+        early_stopping = EarlyStopping(patience=patience, outdir=outdir)
         with trange(max_iter, disable=verbose) as pbar:
             while True: 
                 epoch_loss = 0
@@ -240,7 +241,7 @@ def adjust_learning_rate(init_lr, optimizer, iteration):
 import os
 class EarlyStopping:
     """Early stops the training if loss doesn't improve after a given patience."""
-    def __init__(self, patience=10, verbose=False):
+    def __init__(self, patience=10, verbose=False, outdir='./'):
         """
         Args:
             patience (int): How long to wait after last time loss improved.
@@ -254,6 +255,7 @@ class EarlyStopping:
         self.best_score = None
         self.early_stop = False
         self.loss_min = np.Inf
+        self.model_file = os.path.join(outdir, 'model.pt')
 
     def __call__(self, loss, model):
         if np.isnan(loss):
@@ -269,8 +271,7 @@ class EarlyStopping:
                 print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
-                model.load_model('checkpoint.pt')
-                os.remove('checkpoint.pt')
+                model.load_model(self.model_file)
         else:
             self.best_score = score
             self.save_checkpoint(loss, model)
@@ -280,5 +281,5 @@ class EarlyStopping:
         '''Saves model when loss decrease.'''
         if self.verbose:
             print(f'Loss decreased ({self.loss_min:.6f} --> {loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), 'checkpoint.pt')
+        torch.save(model.state_dict(), self.model_file)
         self.loss_min = loss
