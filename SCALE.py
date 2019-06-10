@@ -81,6 +81,9 @@ if __name__ == '__main__':
         k = args.n_centroids
     lr = args.lr
     name = args.dataset.strip('/').split('/')[-1]
+    
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
         
     print("\n**********************************************************************")
     print("  SCALE: Single-Cell ATAC-seq analysis via Latent feature Extraction")
@@ -103,9 +106,8 @@ if __name__ == '__main__':
                   verbose=args.verbose,
                   device = device,
                   max_iter=args.max_iter,
-#                   n=args.n,
-#                   beta=args.beta,
-                  name=name
+                  name=name,
+                  outdir=outdir
                    )
     else:
         print('\n## Loading Model {} ##\n'.format(args.pretrain))
@@ -115,8 +117,6 @@ if __name__ == '__main__':
     outdir = args.outdir
     if not args.no_results:
         print('outidr: {}'.format(outdir))
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
 
         ### output ###
         # 1. latent GMM feature
