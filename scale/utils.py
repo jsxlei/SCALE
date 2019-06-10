@@ -99,9 +99,8 @@ def estimate_k(data):
     """
     p, n = data.shape
     if type(data) is not np.ndarray:
-        x = scale(data, with_mean=False)
-    else:
-        x = scale(data)
+        data = data.toarray()
+    x = scale(data)
     muTW = (np.sqrt(n-1) + np.sqrt(p)) ** 2
     sigmaTW = (np.sqrt(n-1) + np.sqrt(p)) * (1/np.sqrt(n-1) + 1/np.sqrt(p)) ** (1/3)
     sigmaHatNaive = x.T.dot(x)
