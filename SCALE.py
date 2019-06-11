@@ -137,7 +137,7 @@ if __name__ == '__main__':
     torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
     
     if not args.no_tsne:
-        print("Plot tsne embedding")
+        print("Plotting t-SNE embedding")
         plot_embedding(feature, pred, 
                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         
