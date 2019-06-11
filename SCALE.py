@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 import os
 import argparse
-import gc
 
 from scale import SCALE
 from scale.dataset import SingleCellDataset
@@ -134,14 +133,8 @@ if __name__ == '__main__':
         if args.binary:
             recon_x = binarization(recon_x, raw)
         recon_x.to_csv(os.path.join(outdir, 'imputed_data.txt'), sep='\t') 
-        del recon_x
         
     torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
-    del dataset
-    del model
-        
-    gc.collect()
-    torch.cuda.empty_cache()
     
     if not args.no_tsne:
         print("Plot tsne embedding")
