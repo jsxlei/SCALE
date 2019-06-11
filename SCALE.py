@@ -111,7 +111,7 @@ if __name__ == '__main__':
                   outdir=outdir
                    )
     else:
-        print('\n## Loading Model {} ##\n'.format(args.pretrain))
+        print('\n## Loading Model: {}\n'.format(args.pretrain))
         model.load_model(args.pretrain)
         model.to(device)
 
