@@ -116,7 +116,7 @@ if __name__ == '__main__':
         model.to(device)
 
     ### output ###
-    print('outidr: {}'.format(outdir))
+    print('outdir: {}'.format(outdir))
     # 1. latent feature
     feature = model.encodeBatch(testloader, device=device, out='z')
     pd.DataFrame(feature).to_csv(os.path.join(outdir, 'feature.txt'), sep='\t', header=False)
