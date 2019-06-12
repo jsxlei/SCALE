@@ -13,7 +13,11 @@ Running SCALE on CUDA is recommended if available.
 	python setup.py install
     
 Installation only requieres a few minutes.
+If you have any problem with installing pytorch, use
 
+	conda install pytorch torchvision -c pytorch
+
+or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
 ## Quick Start
 
