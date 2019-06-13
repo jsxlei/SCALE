@@ -31,9 +31,7 @@ class SingleCellDataset(Dataset):
         self.load_data(path)
         
         if min_peaks > 0:
-            indices = np.where(np.sum(self.data>0, 1)>=min_peaks)[0]
-            self.data = self.data[indices]
-            self.cell_id = self.cell_id[indices]
+            self.filter_cell(min_peaks)
         if X>0:
             self.filter_peak(X)
         
@@ -110,4 +108,11 @@ class SingleCellDataset(Dataset):
         indices = np.where(count > 0.01*X*total_cells)[0]
         self.data = self.data[:, indices]
         self.peaks = self.peaks[indices]
+        
+    def filter_cell(self, min_peaks=0):
+        if min_peaks < 1:
+            min_peaks = len(self.peaks)*min_peaks
+        indices = np.where(np.sum(self.data>0, 1)>=min_peaks)[0]
+        self.data = self.data[indices]
+        self.cell_id = self.cell_id[indices]
         
