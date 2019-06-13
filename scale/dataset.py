@@ -75,22 +75,11 @@ class SingleCellDataset(Dataset):
                 exist_file = True
                 break
                 
-        self.load_celltype(os.path.join(path, 'labels.txt'))
-                
         if not exist_file:
             raise "Error: No data.txt or data.txt.gz file in {}".format(path)
             
         print("Finished loading takes {:.2f} min".format((time.time()-t0)/60))
-        
-    def load_celltype(self, celltype_file):
-        if os.path.isfile(celltype_file):
-            celltype = pd.read_csv(celltype_file, sep='\t', header=None, index_col=0)[1].values
-            encoder = LabelEncoder()
-            self.celltype = encoder.fit_transform(celltype)
-            self.CellType = encoder.classes_
-            self.n_celltype = len(self.CellType)
-        else:
-            self.celltype = None
+  
     
     def info(self):
         print("\n===========================")
