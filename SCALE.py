@@ -88,7 +88,7 @@ if __name__ == '__main__':
         os.makedirs(outdir)
         
     print("\n**********************************************************************")
-    print("  SCALE: Single-Cell ATAC-seq analysis via Latent feature Extraction")
+    print("  SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction")
     print("**********************************************************************\n")
     print("======== Parameters ========")
     print('Cell number: {}\nPeak number: {}\nn_centroids: {}\nmax_iter: {}\nbatch_size: {}'.format(
