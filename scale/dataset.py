@@ -25,12 +25,17 @@ class SingleCellDataset(Dataset):
 
     def __init__(self, path, 
                  X = 0,
+                 min_peaks = 0,
                  transforms=[]):
         
         self.load_data(path)
         
         if X>0:
             self.filter_peak(X)
+        if min_peaks > 0:
+            indices = np.where(np.sum(data>0, 1)>=min_peaks)[0]
+            self.data = self.data[indices]
+            self.cell_id = self.cell_id[indices]
         for transform in transforms:
             self.data = transform(self.data)
         
