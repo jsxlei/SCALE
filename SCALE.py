@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('--decode_dim', type=int, nargs='*', default=[], help='encoder structure')
     parser.add_argument('--latent', '-l',type=int, default=10, help='latent layer dim')
     parser.add_argument('-x', type=float, default=0, help='Remove peaks (signal > 0) in less than X percent of cells')
-    parser.add_argument('--min_peaks', type=int, default=0, help='Remove cells with less than min_peaks vailid peaks')
+    parser.add_argument('--min_peaks', type=float, default=0, help='Remove cells with less than min_peaks vailid peaks')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')
     parser.add_argument('--weight_decay', type=float, default=5e-4)
