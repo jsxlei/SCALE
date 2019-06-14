@@ -26,8 +26,8 @@ Input dir of scATAC-seq data should contain one of:
 	* **data.txt** / **data.txt.gz**: count matrix of tab separated format
 * **sparse format**:   
 	* **data.mtx** / **data.mtx.gz**: count matrix of mtx format   
-	* **peaks.txt**: at least 3-columns bed format e.g. chr/tstart/tend without header  
-	* **cell_id.txt**: 1-columns of cell ids without header
+	* **peaks.txt**: at least 3-column bed format without header e.g. chr/tstart/tend     
+	* **cell_id.txt**: 1-column of cell ids without header
 
 #### Run SCALE with provided cluster number k if k is known:  
 
