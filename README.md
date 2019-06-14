@@ -21,9 +21,13 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
 ## Quick Start
 
-Input scATAC-seq data should be one of: 
-* **dense matrix**: **data.txt** / **data.txt.gz**
-* **sparse matrix**: **data.mtx** / **data.mtx.gz**, with **peaks.txt** and **cell_id.txt**
+Input dir of scATAC-seq data should contain one of: 
+* **dense format**:    
+	* **data.txt** / **data.txt.gz**: count matrix of tab separated format
+* **sparse format**:   
+	* **data.mtx** / **data.mtx.gz**: count matrix of mtx format   
+	* **peaks.txt**: at least 3-columns bed format e.g. chr/tstart/tend without header  
+	* **cell_id.txt**: 1-columns of cell ids without header
 
 #### Run SCALE with provided cluster number k if k is known:  
 
