@@ -29,11 +29,11 @@ Input dir of scATAC-seq data should contain one of:
 	* **peaks.txt**: at least 3-column bed format without header e.g. chr/tstart/tend     
 	* **cell_id.txt**: 1-column of cell ids without header
 
-#### Run SCALE with provided cluster number k if k is known:  
+#### Run SCALE with known cluster number k:  
 
     SCALE.py -d [input_dir] -k [k]
 
-#### Or Run SCALE with estimated k: 
+#### Or Run SCALE with k estimated by SCALE if k is unknown: 
 
     SCALE.py -d [input_dir]
 
