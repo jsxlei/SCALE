@@ -105,3 +105,13 @@ class SingleCellDataset(Dataset):
         self.data = self.data[indices]
         self.cell_id = self.cell_id[indices]
         
+def read_mtx(path):
+    data = scipy.io.mmread(os.path.join(path, 'matrix.mtx')).T.tocsr()
+    peaks = pd.read_csv(os.path.join(path, 'peaks.txt'), sep='\t', header=None)
+    peaks = peaks[0].astype('str') + '_' + peaks[1].astype('str') + '_' + peaks[2].astype('str')
+    cell_id_file = os.path.join(path, 'cell_id.txt')
+    if os.path.exists(cell_id_file):
+        cell_id = pd.read_csv(cell_id_file, sep='\t', header=None)[0].values
+    else:
+        cell_id = np.arange(data.shape[0])
+    return data, peaks, cell_id
