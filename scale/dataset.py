@@ -14,7 +14,6 @@ import pandas as pd
 import scipy
 from glob import glob
 from scipy.io import mmread
-import csv
 from sklearn.preprocessing import LabelEncoder
 
 import torch
@@ -77,7 +76,7 @@ class SingleCellDataset(Dataset):
         self.cell_id = self.cell_id[indices]
         
 
-def load_data(path, min_trans=600, ratio=0):
+def load_data(path):
     print("Loading  data ...")
     t0 = time.time()
     if os.path.isdir(path):
