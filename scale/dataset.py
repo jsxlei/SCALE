@@ -11,7 +11,9 @@ import time
 import os
 import numpy as np
 import pandas as pd
-import scipy.io
+import scipy
+from glob import glob
+from scipy.io import mmread
 import csv
 from sklearn.preprocessing import LabelEncoder
 
@@ -28,7 +30,7 @@ class SingleCellDataset(Dataset):
                  min_peaks = 0,
                  transforms=[]):
         
-        self.load_data(path)
+        self.data, self.peaks, self.cell_id = load_data(path)
         
         if min_peaks > 0:
             self.filter_cell(min_peaks)
@@ -49,37 +51,6 @@ class SingleCellDataset(Dataset):
         if type(data) is not np.ndarray:
             data = data.toarray().squeeze()
         return data
-    
-    def load_data(self, path):
-        print("Loading  data ...")
-        t0 = time.time()
-        exist_file = False
-        for data_file in ['data.txt', 'data.txt.gz', 'data.mtx', 'data.mtx.gz']:
-            data_file = os.path.join(path, data_file)
-            if os.path.exists(data_file):
-                if 'txt' in data_file:
-                    data = pd.read_csv(data_file, sep='\t', index_col=0).T
-                    self.peaks = data.columns.values
-                    self.cell_id = data.index.values
-                    self.data = data.values
-                    self.dense = True
-                elif 'mtx' in data_file:
-                    self.data = scipy.io.mmread(data_file).T.tocsr()
-                    peaks = pd.read_csv(os.path.join(path, 'peaks.txt'), sep='\t', header=None)
-                    peaks = peaks[0].astype('str') + '_' + peaks[1].astype('str') + '_' + peaks[2].astype('str')
-                    self.peaks = peaks.values
-                    self.cell_id = [row[0] for row in csv.reader(
-                        open(os.path.join(path, 'cell_id.txt')), delimiter="\t")]
-                    self.peaks, self.cell_id = np.array(self.peaks), np.array(self.cell_id)
-                    self.dense = False
-                exist_file = True
-                break
-                
-        if not exist_file:
-            raise "Error: No data.txt or data.txt.gz file in {}".format(path)
-            
-        print("Finished loading takes {:.2f} min".format((time.time()-t0)/60))
-  
     
     def info(self):
         print("\n===========================")
@@ -105,13 +76,39 @@ class SingleCellDataset(Dataset):
         self.data = self.data[indices]
         self.cell_id = self.cell_id[indices]
         
-def read_mtx(path):
-    data = scipy.io.mmread(os.path.join(path, 'matrix.mtx')).T.tocsr()
-    peaks = pd.read_csv(os.path.join(path, 'peaks.txt'), sep='\t', header=None)
-    peaks = peaks[0].astype('str') + '_' + peaks[1].astype('str') + '_' + peaks[2].astype('str')
-    cell_id_file = os.path.join(path, 'cell_id.txt')
-    if os.path.exists(cell_id_file):
-        cell_id = pd.read_csv(cell_id_file, sep='\t', header=None)[0].values
+
+def load_data(path, min_trans=600, ratio=0):
+    print("Loading  data ...")
+    t0 = time.time()
+    if os.path.isdir(path):
+        data, peaks, cell_id = read_mtx(path)
+    elif os.path.isfile(path):
+        data, peaks, cell_id = read_csv(path)
     else:
-        cell_id = np.arange(data.shape[0])
+        raise ValueError("File {} not exists".format(path))
+    print("Finished loading takes {:.2f} min".format((time.time()-t0)/60))
     return data, peaks, cell_id
+
+
+def read_mtx(path):
+    for filename in glob(path+'/*'):
+        if (('count' in filename) or ('matrix' in filename)) and ('mtx' in filename):
+            count = mmread(filename).T.tocsr().astype('float32')
+        if 'barcode' in filename:
+            cell_id = pd.read_csv(filename, sep='\t', header=None)[0].values
+        if 'gene' in filename or 'peak' in filename:
+            feature = pd.read_csv(filename, sep='\t', header=None).iloc[:, -1].values
+    return count, feature, cell_id
+    
+
+def read_csv(path):
+    if ('.txt' in path) or ('tsv' in path):
+        sep = '\t'
+    elif '.csv' in path:
+        sep = ','
+    else:
+        raise ValueError("File {} not in format txt or csv".format(path))
+    data = pd.read_csv(path, sep=sep, index_col=0).T.astype('float32')
+    genes = data.columns.values
+    cell_id = data.index.values
+    return scipy.sparse.csr_matrix(data.values), genes, cell_id
