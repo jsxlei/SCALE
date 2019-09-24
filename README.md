@@ -21,21 +21,21 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
 ## Quick Start
 
-Input dir of scATAC-seq data should contain one of: 
-* **dense format**:    
-	* **data.txt** / **data.txt.gz**: count matrix of tab separated format
-* **sparse format**:   
-	* **data.mtx** / **data.mtx.gz**: count matrix of mtx format   
-	* **peaks.txt**: at least 3-column bed format without header e.g. **chr**/t**start**/t**end**     
-	* **cell_id.txt**: 1-column of cell ids without header
+## Input: 
+* either a **count matrix file**:  
+	* row is peak and column is barcode, in **txt** / **tsv** (sep=**"\t"**) or **csv** (sep=**","**) format
+* or a **folder** contains **three files**:   
+	* **count file**: count in **mtx** format, filename contains key word **"count"** / **"matrix"**    
+	* **peak file**: 1-column of peaks **chr_start_end**, filename contains key word **"peak"**  
+	* **barcode file**: 1-column of barcodes, filename contains key word **"barcode"**
 
 #### Run SCALE with known cluster number k:  
 
-    SCALE.py -d [input_dir] -k [k]
+    SCALE.py -d [input] -k [k]
 
 #### Or Run SCALE with k estimated by SCALE if k is unknown: 
 
-    SCALE.py -d [input_dir]
+    SCALE.py -d [input]
 
 #### Data availability  
 Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/u/d/a776d93940dc43c5aad6/)  
