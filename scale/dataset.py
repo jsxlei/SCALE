@@ -62,7 +62,6 @@ class SingleCellDataset(Dataset):
         Removes rare peaks with (signal > 0) in less than X% of cells 
         """
         total_cells = self.data.shape[0]
-        
         count = np.array((self.data >0).sum(0)).squeeze()
         indices = np.where(count > 0.01*X*total_cells)[0]
         self.data = self.data[:, indices]
@@ -91,11 +90,12 @@ def load_data(path):
 
 def read_mtx(path):
     for filename in glob(path+'/*'):
-        if (('count' in filename) or ('matrix' in filename)) and ('mtx' in filename):
+        basename = os.path.basename(filename)
+        if (('count' in basename) or ('matrix' in basename)) and ('mtx' in basename):
             count = mmread(filename).T.tocsr().astype('float32')
-        if 'barcode' in filename:
+        elif 'barcode' in basename:
             cell_id = pd.read_csv(filename, sep='\t', header=None)[0].values
-        if 'gene' in filename or 'peak' in filename:
+        elif 'gene' in basename or 'peak' in basename:
             feature = pd.read_csv(filename, sep='\t', header=None).iloc[:, -1].values
     return count, feature, cell_id
     
