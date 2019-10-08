@@ -11,6 +11,7 @@
 
 import numpy as np
 import pandas as pd
+import scipy
 import os
 import torch
 from torch.utils.data import TensorDataset, DataLoader
@@ -202,17 +203,19 @@ def cluster_report(ref, pred, classes):
     print("\nAdjusted Rand score : {:.4f}".format(ari_score))
 
     
+# def binarization(imputed, peak_mean, cell_mean):
+#     """
+#     Transform imputed float values to binary
+#         imputed values at (i, j) -> 1: 
+#             greater than average value of ith peak in raw data
+#             greater than average value of jth cell in raw data
+#         otherwise 0
+#     """
+# #     peak_mean = raw.mean(1)
+# #     cell_mean = raw.mean(0)
+#     v1 = imputed.gt(peak_mean, axis=0)
+#     v2 = imputed.gt(cell_mean, axis=1)
+#     binary = (v1 & v2).astype(int)
+#     return binary
 def binarization(imputed, raw):
-    """
-    Transform imputed float values to binary
-        imputed values at (i, j) -> 1: 
-            greater than average value of ith peak in raw data
-            greater than average value of jth cell in raw data
-        otherwise 0
-    """
-    peak_mean = raw.mean(1)
-    cell_mean = raw.mean(0)
-    v1 = imputed.gt(peak_mean, axis=0)
-    v2 = imputed.gt(cell_mean, axis=1)
-    binary = (v1 & v2).astype(int)
-    return binary
+    return scipy.sparse.csr_matrix((imputed.T > raw.mean(1).T).T & (imputed>raw.mean(0))).astype(np.int8)
