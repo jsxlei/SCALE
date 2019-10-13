@@ -21,7 +21,7 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
 ## Quick Start
 
-## Input: 
+#### Input: 
 * either a **count matrix file**:  
 	* row is peak and column is barcode, in **txt** / **tsv** (sep=**"\t"**) or **csv** (sep=**","**) format
 * or a **folder** contains **three files**:   
@@ -37,6 +37,22 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
     SCALE.py -d [input]
 
+#### Imputation  
+Get binary imputed data in folder **binary_imputed** with option --binary
+
+    SCALE.py -d [input] --binary  
+or get numerical imputed data in file **imputed_data.txt"** with option --impute
+
+    SCALE.py -d [input] --impute
+    
+#### Results
+Results will be saved in the output folder including:
+* model.pt
+* feature.txt
+* cluster_assignments.txt
+* tsne.txt
+* tsne.pdf 
+    
 #### Data availability  
 Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/eb4371c556bc46ef8516/)  
 
@@ -55,14 +71,6 @@ If come across the nan loss,
 * filter peaks with harsher threshold like -x 4 or -x 6
 * change the initial learning rate to 0.0002 
 	
-#### Results
-Results will be saved in the output folder including:
-* model.pt
-* feature.txt
-* cluster_assignments.txt
-* imputed_data.txt
-* tsne.txt
-* tsne.pdf
 
 #### Help
 Look for more usage of SCALE
