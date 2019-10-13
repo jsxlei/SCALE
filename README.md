@@ -31,11 +31,11 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 	* **barcode file**: 1-column of barcodes, filename contains key word **"barcode"**
 
 #### Run
-SCALE with known cluster number k:  
+with known cluster number k:  
 
     SCALE.py -d [input] -k [k]
 
-Or Run SCALE with k estimated by SCALE if k is unknown: 
+with estimated cluster number k by SCALE if k is unknown: 
 
     SCALE.py -d [input]
 
@@ -48,7 +48,7 @@ Output will be saved in the output folder including:
 * **tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
 
 #### Imputation  
-Get binary imputed data in folder **binary_imputed** with option --binary
+Get binary imputed data in folder **binary_imputed** with option --binary (recommended for saving storage)
 
     SCALE.py -d [input] --binary  
     
