@@ -13,6 +13,7 @@ Running SCALE on CUDA is recommended if available.
 	python setup.py install
     
 Installation only requieres a few minutes.  
+
 If you have any problem with installing pytorch, use
 
 	conda install pytorch torchvision -c pytorch
@@ -40,7 +41,7 @@ Or Run SCALE with k estimated by SCALE if k is unknown:
 
 #### Output
 Output will be saved in the output folder including:
-* **model.pt**:  model which could be reused to generate wanted results with option --pretrain [model_path]model.pt
+* **model.pt**:  model which could be reused to generate wanted results with option --pretrain output/model.pt
 * **feature.txt**:  latent feature representations of each cell used for clustering or visualization
 * **cluster_assignments.txt**:  clustering assignments of each cell
 * **tsne.txt**:  2d t-SNE embeddings of each cell
