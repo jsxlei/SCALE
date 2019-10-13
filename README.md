@@ -48,7 +48,7 @@ Output will be saved in the output folder including:
 * **tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
 
 #### Imputation  
-Get binary imputed data in folder **binary_imputed** with option --binary (recommended for saving storage)
+Get binary imputed data in folder **binary_imputed** with option **--binary** (recommended for saving storage)
 
     SCALE.py -d [input] --binary  
     
