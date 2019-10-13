@@ -21,7 +21,7 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 
 ## Quick Start
 
-#### Input: 
+#### Input
 * either a **count matrix file**:  
 	* row is peak and column is barcode, in **txt** / **tsv** (sep=**"\t"**) or **csv** (sep=**","**) format
 * or a **folder** contains **three files**:   
@@ -29,33 +29,32 @@ or refer to [this](https://pytorch.org/get-started/locally/) for more detail
 	* **peak file**: 1-column of peaks **chr_start_end**, filename contains key word **"peak"**  
 	* **barcode file**: 1-column of barcodes, filename contains key word **"barcode"**
 
-#### Run SCALE with known cluster number k:  
+#### Run
+SCALE with known cluster number k:  
 
     SCALE.py -d [input] -k [k]
 
-#### Or Run SCALE with k estimated by SCALE if k is unknown: 
+Or Run SCALE with k estimated by SCALE if k is unknown: 
 
     SCALE.py -d [input]
+
+#### Output
+Output will be saved in the output folder including:
+* **model.pt**:  model which could be reused to generate wanted results with option --pretrain [model_path]model.pt
+* **feature.txt**:  latent feature representations of each cell used for clustering or visualization
+* **cluster_assignments.txt**:  clustering assignments of each cell
+* **tsne.txt**:  2d t-SNE embeddings of each cell
+* **tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
 
 #### Imputation  
 Get binary imputed data in folder **binary_imputed** with option --binary
 
     SCALE.py -d [input] --binary  
+    
 or get numerical imputed data in file **imputed_data.txt"** with option --impute
 
     SCALE.py -d [input] --impute
-    
-#### Results
-Results will be saved in the output folder including:
-* model.pt
-* feature.txt
-* cluster_assignments.txt
-* tsne.txt
-* tsne.pdf 
-    
-#### Data availability  
-Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/eb4371c556bc46ef8516/)  
-
+     
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
 * filter rare peaks if the peaks quality if not good or too many: [-x]
@@ -89,6 +88,9 @@ Use functions in SCALE packages.
   <img src="https://github.com/jsxlei/SCALE/wiki/png/runtime.png" width="350" />
   <img src="https://github.com/jsxlei/SCALE/wiki/png/memory.png" width="350" /> 
 </p>
+
+#### Data availability  
+Download all the **provided datasets** [[Download]](https://cloud.tsinghua.edu.cn/d/eb4371c556bc46ef8516/) 
 
 ## Tutorial
 
