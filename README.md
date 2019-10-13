@@ -52,7 +52,7 @@ Get binary imputed data in folder **binary_imputed** with option **--binary** (r
 
     SCALE.py -d [input] --binary  
     
-or get numerical imputed data in file **imputed_data.txt"** with option --impute
+or get numerical imputed data in file **imputed_data.txt"** with option **--impute**
 
     SCALE.py -d [input] --impute
      
