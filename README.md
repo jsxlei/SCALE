@@ -41,7 +41,7 @@ with estimated cluster number k by SCALE if k is unknown:
 
 #### Output
 Output will be saved in the output folder including:
-* **model.pt**:  model which could be reused to generate wanted results with option --pretrain output/model.pt
+* **model.pt**:  saved model to reproduce results cooperated with option --pretrain
 * **feature.txt**:  latent feature representations of each cell used for clustering or visualization
 * **cluster_assignments.txt**:  clustering assignments of each cell
 * **tsne.txt**:  2d t-SNE embeddings of each cell
@@ -52,7 +52,7 @@ Get binary imputed data in folder **binary_imputed** with option **--binary** (r
 
     SCALE.py -d [input] --binary  
     
-or get numerical imputed data in file **imputed_data.txt"** with option **--impute**
+or get numerical imputed data in file **imputed_data.txt** with option **--impute**
 
     SCALE.py -d [input] --impute
      
