@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('--latent', '-l',type=int, default=10, help='latent layer dim')
     parser.add_argument('--low', '-x', type=float, default=0.01, help='Remove low ratio peaks')
     parser.add_argument('--high', type=float, default=0.9, help='Remove high ratio peaks')
-    parser.add_argument('--min_peaks', type=float, default=200, help='Remove low quality cells with few peaks')
+    parser.add_argument('--min_peaks', type=float, default=100, help='Remove low quality cells with few peaks')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')
     parser.add_argument('--weight_decay', type=float, default=5e-4)
