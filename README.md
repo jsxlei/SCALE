@@ -52,7 +52,8 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
      
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
-* filter rare peaks if the peaks quality if not good or too many: [-x]
+* filter rare peaks if the peaks quality if not good or too many, default is 0.01: [-x]
+* filter low quality cells by valid peaks number, default 100: [--min_peaks]  
 * modify the initial learning rate, default is 0.002: [--lr]  
 * change the batch size, default is 32: [--batch_size]
 * change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
@@ -62,7 +63,7 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
 #### Note    
 If come across the nan loss, 
 * try another random seed
-* filter peaks with harsher threshold like -x 4 or -x 6
+* filter peaks with harsher threshold like -x 0.04 or -x 0.06
 * change the initial learning rate to 0.0002 
 	
 
