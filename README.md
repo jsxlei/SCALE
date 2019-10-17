@@ -63,7 +63,8 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
 #### Note    
 If come across the nan loss, 
 * try another random seed
-* filter peaks with harsher threshold like -x 0.04 or -x 0.06
+* filter peaks with harsher threshold, e.g. -x 0.04 or -x 0.06
+* filter low quality cells, e.g. --min_peaks 200 or 600
 * change the initial learning rate to 0.0002 
 	
 
