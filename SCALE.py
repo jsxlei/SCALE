@@ -82,7 +82,7 @@ if __name__ == '__main__':
     input_dim = dataset.shape[1] 	
     
     if args.n_centroids is None:
-        k = estimate_k(dataset.data.T)
+        k = min(estimate_k(dataset.data.T), 30)
         print('Estimate k {}'.format(k))
     else:
         k = args.n_centroids
