@@ -52,7 +52,7 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
      
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
-* embed feature by tSNE or UMAP: [--emb]  
+* embed feature by tSNE or UMAP: [--emb]  TSNE/UMAP
 * filter rare peaks if the peaks quality if not good or too many, default is 0.01: [-x]
 * filter low quality cells by valid peaks number, default 100: [--min_peaks]  
 * modify the initial learning rate, default is 0.002: [--lr]  
