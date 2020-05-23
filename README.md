@@ -38,8 +38,8 @@ Output will be saved in the output folder including:
 * **model.pt**:  saved model to reproduce results cooperated with option --pretrain
 * **feature.txt**:  latent feature representations of each cell used for clustering or visualization
 * **cluster_assignments.txt**:  clustering assignments of each cell
-* **tsne.txt**:  2d t-SNE embeddings of each cell
-* **tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
+* **emb_tsne.txt**:  2d t-SNE embeddings of each cell
+* **emb_tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
 
 #### Imputation  
 Get binary imputed data in folder **binary_imputed** with option **--binary** (recommended for saving storage)
@@ -52,6 +52,7 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
      
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
+* embed feature by tSNE or UMAP: [--emb]  
 * filter rare peaks if the peaks quality if not good or too many, default is 0.01: [-x]
 * filter low quality cells by valid peaks number, default 100: [--min_peaks]  
 * modify the initial learning rate, default is 0.002: [--lr]  
