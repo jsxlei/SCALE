@@ -54,7 +54,8 @@ if __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=5e-4)
     parser.add_argument('--impute', action='store_true', help='Save the imputed data')
     parser.add_argument('--binary', action='store_true', help='Save binary imputed data')
-    parser.add_argument('--no_tsne', action='store_true', help='Not save the tsne embedding')
+#     parser.add_argument('--no_tsne', action='store_true', help='Not save the tsne embedding')
+    parser.add_argument('--emb', type=str, default='UMAP')
     parser.add_argument('--reference', '-r', default=None, type=str, help='Reference celltypes')
     parser.add_argument('--transpose', '-t', action='store_true', help='Transpose the input matrix')
 
@@ -153,13 +154,15 @@ if __name__ == '__main__':
         
 #     torch.save(model.to('cpu').state_dict(), os.path.join(outdir, 'model.pt')) # save model
     
-    if not args.no_tsne:
-        print("Plotting tSNE embedding")
-        if args.reference:
-            ref = pd.read_csv(args.reference, sep='\t', header=None, index_col=0)[1]
-            labels = ref.reindex(dataset.barcode, fill_value='unknown')
-        else:
-            labels = pred
-        plot_embedding(feature, labels, 
-                       save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
+#     if not args.no_tsne:
+    print("Plotting embedding")
+    if args.reference:
+        ref = pd.read_csv(args.reference, sep='\t', header=None, index_col=0)[1]
+        labels = ref.reindex(dataset.barcode, fill_value='unknown')
+    else:
+        labels = pred
+    plot_embedding(feature, labels, emb=args.emb, 
+                   save=os.path.join(outdir, 'emb_{}.pdf'.format(args.emb)), save=os.path.join(outdir, 'emb_{}.txt'.format(args.emb)))
+#         plot_embedding(feature, labels, 
+#                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         

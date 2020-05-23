@@ -163,7 +163,7 @@ def plot_heatmap(X, y, classes=None, y_pred=None, row_labels=None, colormap=None
                                frameon=False, 
                                ncol=ncol)
         grid.ax_col_colors.tick_params(labelsize=6, length=0, labelcolor='orange')
- 
+
     if (row_cluster==True) and (yticklabels is not ''):
         yticklabels = yticklabels[grid.dendrogram_row.reordered_ind]
 
@@ -197,7 +197,7 @@ def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize
             X = TSNE(n_components=2, random_state=124).fit_transform(X)
         if method == 'UMAP':
             from umap import UMAP
-            X = UMAP(n_neighbors=30, min_dist=0.3, metric='correlation').fit_transform(X)
+            X = UMAP(n_neighbors=30, min_dist=0.1, metric='correlation').fit_transform(X)
         if method == 'PCA':
             from sklearn.decomposition import PCA
             X = PCA(n_components=2, random_state=124).fit_transform(X)
