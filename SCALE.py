@@ -162,7 +162,7 @@ if __name__ == '__main__':
     else:
         labels = pred
     plot_embedding(feature, labels, emb=args.emb, 
-                   save=os.path.join(outdir, 'emb_{}.pdf'.format(args.emb)), save=os.path.join(outdir, 'emb_{}.txt'.format(args.emb)))
+                   save=os.path.join(outdir, 'emb_{}.pdf'.format(args.emb)), save_emb=os.path.join(outdir, 'emb_{}.txt'.format(args.emb)))
 #         plot_embedding(feature, labels, 
 #                        save=os.path.join(outdir, 'tsne.pdf'), save_emb=os.path.join(outdir, 'tsne.txt'))
         
