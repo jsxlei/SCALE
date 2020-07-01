@@ -117,7 +117,7 @@ class VAE(nn.Module):
             max_iter=30000,
             verbose=True,
             name='',
-            patience=10,
+            patience=100,
             outdir='./'
        ):
 
