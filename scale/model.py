@@ -210,7 +210,7 @@ class SCALE(VAE):
 
         N = z.size(0)
         z = z.unsqueeze(2).expand(z.size(0), z.size(1), n_centroids)
-        pi = self.pi.repeat(N,1) # NxK
+        pi = torch.clamp(self.pi.repeat(N,1), 1e-10, 1) # NxK
         mu_c = self.mu_c.repeat(N,1,1) # NxDxK
         var_c = self.var_c.repeat(N,1,1) # NxDxK
 
