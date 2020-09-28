@@ -88,7 +88,6 @@ Use functions in SCALE packages.
 </p>
 
 #### Data availability  
-Download all the **provided datasets** 
 * [Forebrain](http://zhanglab.net/SCALE_SOURCE_DATA/Forebrain.tar)
 * [Splenocyte](http://zhanglab.net/SCALE_SOURCE_DATA/Splenocyte.tar)
 * [mouse_atlas](http://zhanglab.net/SCALE_SOURCE_DATA/mouse_atlas.tar)
