@@ -87,6 +87,15 @@ Use functions in SCALE packages.
   <img src="https://github.com/jsxlei/SCALE/wiki/png/memory.png" width="350" /> 
 </p>
 
+
+## Tutorial
+
+
+**[Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)**   Run SCALE on dense matrix **Forebrain** dataset (k=8, 2088 cells)
+	
+**[Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)**   Run SCALE on sparse matrix **Mouse Atlas** dataset (k=30, ~80,000 cells)
+
+
 #### Data availability  
 * [Forebrain](http://zhanglab.net/SCALE_SOURCE_DATA/Forebrain.tar)
 * [Splenocyte](http://zhanglab.net/SCALE_SOURCE_DATA/Splenocyte.tar)
@@ -96,13 +105,6 @@ Use functions in SCALE packages.
 * [GM12878vsHEK](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHEK.tar)
 * [GM12878vsHL](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHL.tar)
 * [Breast_Tumor](http://zhanglab.net/SCALE_SOURCE_DATA/Breast_Tumor.tar)
-
-## Tutorial
-
-
-**[Tutorial Forebrain](https://github.com/jsxlei/SCALE/wiki/Forebrain)**   Run SCALE on dense matrix **Forebrain** dataset (k=8, 2088 cells)
-	
-**[Tutorial Mouse Atlas](https://github.com/jsxlei/SCALE/wiki/Mouse-Atlas)**   Run SCALE on sparse matrix **Mouse Atlas** dataset (k=30, ~80,000 cells)
 
 
 ## Reference
