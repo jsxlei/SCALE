@@ -7,7 +7,6 @@
 # Description:
 
 """
-
 from setuptools import setup, find_packages
 
 with open('requirements.txt') as f:
@@ -15,8 +14,10 @@ with open('requirements.txt') as f:
 
 setup(name='scale-atac',
       version='1.0.4',
-      description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
       packages=find_packages(),
+      description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
+      long_description='',
+
 
       author='Lei Xiong',
       author_email='jsxlei@gmail.com',
@@ -24,6 +25,7 @@ setup(name='scale-atac',
       scripts=['SCALE.py'],
       install_requires=requirements,
       python_requires='>3.6.0',
+      license='MIT',
 
       classifiers=[
           'Development Status :: 4 - Beta',
