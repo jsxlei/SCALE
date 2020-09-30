@@ -9,8 +9,7 @@
 """
 
 __author__ = "Lei Xiong"
-__email__ = "jsxlei@gmail"
-__version__ = '1.0.3'
+__email__ = "jsxlei@gmail.com"
 
 from .layer import *
 from .model import *

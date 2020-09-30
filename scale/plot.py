@@ -197,7 +197,7 @@ def plot_embedding(X, labels, classes=None, method='tSNE', cmap='tab20', figsize
             X = TSNE(n_components=2, random_state=124).fit_transform(X)
         if method == 'UMAP':
             from umap import UMAP
-            X = UMAP(n_neighbors=30, min_dist=0.1, metric='correlation').fit_transform(X)
+            X = UMAP(n_neighbors=30, min_dist=0.1).fit_transform(X)
         if method == 'PCA':
             from sklearn.decomposition import PCA
             X = PCA(n_components=2, random_state=124).fit_transform(X)
