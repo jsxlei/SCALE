@@ -17,7 +17,7 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import MinMaxScaler, LabelEncoder, scale
-from sklearn.metrics import classification_report, confusion_matrix, adjusted_rand_score
+from sklearn.metrics import classification_report, confusion_matrix, adjusted_rand_score, normalized_mutual_info_score
 
 # ============== Data Processing ==============
 # =============================================
@@ -92,6 +92,7 @@ def sample_filter(data, x=10, n_reads=2):
 # =================== Other ====================
 # ==============================================
 
+from scipy.sparse.linalg import eigsh
 def estimate_k(data):
     """
     Estimate number of groups k:
@@ -99,21 +100,23 @@ def estimate_k(data):
         input data is (p,n) matrix, p is feature, n is sample
     """
     p, n = data.shape
-    if type(data) is not np.ndarray:
-        data = data.toarray()
-    x = scale(data)
+
+    x = scale(data, with_mean=False)
     muTW = (np.sqrt(n-1) + np.sqrt(p)) ** 2
     sigmaTW = (np.sqrt(n-1) + np.sqrt(p)) * (1/np.sqrt(n-1) + 1/np.sqrt(p)) ** (1/3)
     sigmaHatNaive = x.T.dot(x)
 
     bd = np.sqrt(p) * sigmaTW + muTW
-    evals = np.linalg.eigvalsh(sigmaHatNaive)
+    evals, _ = eigsh(sigmaHatNaive)
 
     k = 0
     for i in range(len(evals)):
         if evals[i] > bd:
             k += 1
     return k
+
+# def estimate_k(data):
+#     return min(data.shape[0]/100, 30)
 
 def get_decoder_weight(model_file):
     state_dict = torch.load(model_file)
@@ -189,7 +192,8 @@ def reassign_cluster_with_ref(Y_pred, Y):
 
     return reassign_cluster(Y_pred, ind)
 
-def cluster_report(ref, pred, classes):
+
+def cluster_report(ref, pred, classes=None):
     """
     Print Cluster Report
     """
@@ -197,25 +201,10 @@ def cluster_report(ref, pred, classes):
     cm = confusion_matrix(ref, pred)
     print('\n## Confusion matrix ##\n')
     print(cm)
-    print('\n## Cluster Report ##\n')
-    print(classification_report(ref, pred, target_names=classes))
-    ari_score = adjusted_rand_score(ref, pred)
-    print("\nAdjusted Rand score : {:.4f}".format(ari_score))
-
+    print('\n## Cluster Report ##')
+#     print(classification_report(ref, pred, target_names=classes))
+    print("Adjusted Rand Index score: {:.4f}".format(adjusted_rand_score(ref, pred)))
+    print("`Normalized Mutual Info score: {:.4f}".format(normalized_mutual_info_score(ref, pred)))
     
-# def binarization(imputed, peak_mean, cell_mean):
-#     """
-#     Transform imputed float values to binary
-#         imputed values at (i, j) -> 1: 
-#             greater than average value of ith peak in raw data
-#             greater than average value of jth cell in raw data
-#         otherwise 0
-#     """
-# #     peak_mean = raw.mean(1)
-# #     cell_mean = raw.mean(0)
-#     v1 = imputed.gt(peak_mean, axis=0)
-#     v2 = imputed.gt(cell_mean, axis=1)
-#     binary = (v1 & v2).astype(int)
-#     return binary
 def binarization(imputed, raw):
     return scipy.sparse.csr_matrix((imputed.T > raw.mean(1).T).T & (imputed>raw.mean(0))).astype(np.int8)

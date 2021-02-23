@@ -4,7 +4,7 @@
 # Created Time : Mon 23 Apr 2018 08:26:32 PM CST
 
 # File Name: loss_function.py
-# Description:
+# Description:`
 
 """
 import torch
@@ -52,6 +52,7 @@ def elbo_SCALE(recon_x, x, gamma, c_params, z_params, binary=True):
               = Eq(z,c|x)[ log p(x|z) + log p(z|c) + log p(c) - log q(z|x) - log q(c|x) ]
     """
     mu_c, var_c, pi = c_params; #print(mu_c.size(), var_c.size(), pi.size())
+    var_c += 1e-8
     n_centroids = pi.size(1)
     mu, logvar = z_params
     mu_expand = mu.unsqueeze(2).expand(mu.size(0), mu.size(1), n_centroids)
@@ -68,6 +69,7 @@ def elbo_SCALE(recon_x, x, gamma, c_params, z_params, binary=True):
                                            torch.log(var_c) + \
                                            torch.exp(logvar_expand)/var_c + \
                                            (mu_expand-mu_c)**2/var_c, dim=1), dim=1)
+    
     # log p(c)
     logpc = torch.sum(gamma*torch.log(pi), 1)
 
@@ -78,7 +80,7 @@ def elbo_SCALE(recon_x, x, gamma, c_params, z_params, binary=True):
     logqcx = torch.sum(gamma*torch.log(gamma), 1)
 
     kld = -logpzc - logpc + qentropy + logqcx
-
+    
     return torch.sum(likelihood), torch.sum(kld)
-
+#     return torch.sum(likelihood), torch.sum(logpzc), torch.sum(logpc), torch.sum(qentropy), torch.sum(logqcx)
 

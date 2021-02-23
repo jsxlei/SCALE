@@ -17,7 +17,7 @@ from torch.optim.lr_scheduler import MultiStepLR, ExponentialLR, ReduceLROnPlate
 import time
 import math
 import numpy as np
-from tqdm import trange
+from tqdm import tqdm, trange
 from itertools import repeat
 from sklearn.mixture import GaussianMixture
 
@@ -75,9 +75,9 @@ class VAE(nn.Module):
     def loss_function(self, x):
         z, mu, logvar = self.encoder(x)
         recon_x = self.decoder(z)
-        likelihood, kld = elbo(recon_x, x, (mu, logvar), binary=self.binary)
+        likelihood, kl_loss = elbo(recon_x, x, (mu, logvar), binary=self.binary)
 
-        return (-likelihood, kld)
+        return (-likelihood, kl_loss)
 
 
     def predict(self, dataloader, device='cpu', method='kmeans'):
@@ -116,7 +116,6 @@ class VAE(nn.Module):
             n = 200,
             max_iter=30000,
             verbose=True,
-            name='',
             patience=100,
             outdir='./'
        ):
@@ -126,41 +125,40 @@ class VAE(nn.Module):
         Beta = DeterministicWarmup(n=n, t_max=beta)
         
         iteration = 0
+        n_epoch = int(np.ceil(max_iter/len(dataloader)))
         early_stopping = EarlyStopping(patience=patience, outdir=outdir)
-        with trange(max_iter, disable=verbose) as pbar:
-            while True: 
-                epoch_loss = 0
-                for i, x in enumerate(dataloader):
-                    epoch_lr = adjust_learning_rate(lr, optimizer, iteration)
-                    t0 = time.time()
+        with tqdm(range(n_epoch), total=n_epoch, desc='Epochs') as tq:
+            for epoch in tq:
+#                 epoch_loss = 0
+                epoch_recon_loss, epoch_kl_loss = 0, 0
+                tk0 = tqdm(enumerate(dataloader), total=len(dataloader), leave=False, desc='Iterations')
+                for i, x in tk0:
+#                     epoch_lr = adjust_learning_rate(lr, optimizer, iteration)
                     x = x.float().to(device)
                     optimizer.zero_grad()
                     
                     recon_loss, kl_loss = self.loss_function(x)
-                    loss = (recon_loss + next(Beta) * kl_loss)/len(x);
+#                     loss = (recon_loss + next(Beta) * kl_loss)/len(x);
+                    loss = (recon_loss + kl_loss)/len(x)
                     loss.backward()
+                    torch.nn.utils.clip_grad_norm(self.parameters(), 10) # clip
                     optimizer.step()
                     
-                    epoch_loss += loss.item()
-                    pbar.set_postfix_str('loss={:.3f} recon_loss={:.3f} kl_loss={:.3f}'.format(
+                    epoch_kl_loss += kl_loss.item()
+                    epoch_recon_loss += recon_loss.item()
+
+                    tk0.set_postfix_str('loss={:.3f} recon_loss={:.3f} kl_loss={:.3f}'.format(
                             loss, recon_loss/len(x), kl_loss/len(x)))
-                    pbar.update(1)
+                    tk0.update(1)
                     
                     iteration+=1
-                    if iteration >= max_iter:
-                        break
-                else:
-                    early_stopping(epoch_loss, self)
-                    if early_stopping.early_stop:
-                        print('EarlyStopping: run {} iteration'.format(iteration))
-                        break
-                    continue
-                break
+                tq.set_postfix_str('recon_loss {:.3f} kl_loss {:.3f}'.format(
+                    epoch_recon_loss/((i+1)*len(x)), epoch_kl_loss/((i+1)*len(x))))
+
 
     def encodeBatch(self, dataloader, device='cpu', out='z', transforms=None):
         output = []
-        for i, inputs in enumerate(dataloader):
-            x = inputs
+        for x in dataloader:
             x = x.view(x.size(0), -1).float().to(device)
             z, mu, logvar = self.encoder(x)
 
@@ -170,12 +168,10 @@ class VAE(nn.Module):
                 recon_x = self.decoder(z)
                 output.append(recon_x.detach().cpu().data)
             elif out == 'logit':
-                output.append(self.get_gamma(z)[0].cpu().detach())
+                output.append(self.get_gamma(z)[0].cpu().detach().data)
 
         output = torch.cat(output).numpy()
-        if out == 'x':
-            for transform in transforms:
-                output = transform(output)
+
         return output
 
 
@@ -195,9 +191,9 @@ class SCALE(VAE):
         z, mu, logvar = self.encoder(x)
         recon_x = self.decoder(z)
         gamma, mu_c, var_c, pi = self.get_gamma(z) #, self.n_centroids, c_params)
-        likelihood, kld = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
+        likelihood, kl_loss = elbo_SCALE(recon_x, x, gamma, (mu_c, var_c, pi), (mu, logvar), binary=self.binary)
 
-        return -likelihood, kld
+        return -likelihood, kl_loss
 
     def get_gamma(self, z):
         """
@@ -210,9 +206,10 @@ class SCALE(VAE):
 
         N = z.size(0)
         z = z.unsqueeze(2).expand(z.size(0), z.size(1), n_centroids)
-        pi = torch.clamp(self.pi.repeat(N,1), 1e-10, 1) # NxK
+        pi = self.pi.repeat(N, 1) # NxK
+#         pi = torch.clamp(self.pi.repeat(N,1), 1e-10, 1) # NxK
         mu_c = self.mu_c.repeat(N,1,1) # NxDxK
-        var_c = self.var_c.repeat(N,1,1) # NxDxK
+        var_c = self.var_c.repeat(N,1,1) + 1e-8 # NxDxK
 
         # p(c,z) = p(c)*p(z|c) as p_c_z
         p_c_z = torch.exp(torch.log(pi) - torch.sum(0.5*torch.log(2*math.pi*var_c) + (z-mu_c)**2/(2*var_c), dim=1)) + 1e-10

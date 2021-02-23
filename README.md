@@ -1,6 +1,9 @@
 # Single-Cell ATAC-seq analysis via Latent feature Extraction
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
+## News 
+2021.01.14 Update to compatible with [h5ad](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) file and [scanpy](https://scanpy.readthedocs.io/en/stable/index.html)
+
 ## Installation  
 
 SCALE neural network is implemented in [Pytorch](https://pytorch.org/) framework.  
@@ -17,29 +20,27 @@ Installation only requires a few minutes.
 ## Quick Start
 
 #### Input
-* either a **count matrix file**:  
+* h5ad file
+* **count matrix file**:  
 	* row is peak and column is barcode, in **txt** / **tsv** (sep=**"\t"**) or **csv** (sep=**","**) format
-* or a **folder** contains **three files**:   
+* mtx **folder** contains **three files**:   
 	* **count file**: count in **mtx** format, filename contains key word **"count"** / **"matrix"**    
 	* **peak file**: 1-column of peaks **chr_start_end**, filename contains key word **"peak"**  
 	* **barcode file**: 1-column of barcodes, filename contains key word **"barcode"**
 
-#### Run
-with known cluster number k:  
-
-    SCALE.py -d [input] -k [k]
-
-with estimated cluster number k by SCALE if k is unknown: 
+#### Run 
 
     SCALE.py -d [input]
+    
+if cluster number k is known:
+
+    SCALE.py -d [input] -k [k]
 
 #### Output
 Output will be saved in the output folder including:
 * **model.pt**:  saved model to reproduce results cooperated with option --pretrain
-* **feature.txt**:  latent feature representations of each cell used for clustering or visualization
-* **cluster_assignments.txt**:  clustering assignments of each cell
-* **emb_tsne.txt**:  2d t-SNE embeddings of each cell
-* **emb_tsne.pdf**:  visualization of 2d t-SNE embeddings of each cell
+* **adata.h5ad**:  saved data including Leiden cluster assignment, latent feature matrix and UMAP results.
+* **umap.pdf**:  visualization of 2d UMAP embeddings of each cell
 
 #### Imputation  
 Get binary imputed data in folder **binary_imputed** with option **--binary** (recommended for saving storage)
@@ -52,21 +53,13 @@ or get numerical imputed data in file **imputed_data.txt** with option **--imput
      
 #### Useful options  
 * save results in a specific folder: [-o] or [--outdir] 
-* embed feature by tSNE or UMAP: [--emb]  TSNE/UMAP
-* filter rare peaks if the peaks quality if not good or too many, default is 0.01: [-x]
-* filter low quality cells by valid peaks number, default 100: [--min_peaks]  
+* embed feature by tSNE or UMAP: [--embed]  tSNE/UMAP
+* filter low quality cells by valid peaks number, default 100: [--min_peaks] 
+* filter low quality peaks by valid cells number, default 10: [--min_cells]
 * modify the initial learning rate, default is 0.002: [--lr]  
 * change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
 * change random seed for parameter initialization, default is 18: [--seed]
 * binarize the imputation values: [--binary]
-* run with scRNA-seq dataset: [--log_transform]
-	
-#### Note    
-If come across the nan loss, 
-* try another random seed
-* filter peaks with harsher threshold, e.g. -x 0.04 or 0.06
-* filter low quality cells, e.g. --min_peaks 400 or 600
-* change the initial learning rate, e.g. --lr 0.0002 
 	
 
 #### Help
@@ -97,14 +90,14 @@ Use functions in SCALE packages.
 
 
 #### Data availability  
-* [Forebrain](http://zhanglab.net/SCALE_SOURCE_DATA/Forebrain.tar)
-* [Splenocyte](http://zhanglab.net/SCALE_SOURCE_DATA/Splenocyte.tar)
-* [mouse_atlas](http://zhanglab.net/SCALE_SOURCE_DATA/mouse_atlas.tar)
-* [InSilico](http://zhanglab.net/SCALE_SOURCE_DATA/InSilico.tar)
-* [Leukemia](http://zhanglab.net/SCALE_SOURCE_DATA/Leukemia.tar)
-* [GM12878vsHEK](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHEK.tar)
-* [GM12878vsHL](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHL.tar)
-* [Breast_Tumor](http://zhanglab.net/SCALE_SOURCE_DATA/Breast_Tumor.tar)
+* [Forebrain](http://zhanglab.net/SCALE_SOURCE_DATA/Forebrain.h5ad)
+* [Splenocyte](http://zhanglab.net/SCALE_SOURCE_DATA/Splenocyte.h5ad)
+* [mouse_atlas](http://zhanglab.net/SCALE_SOURCE_DATA/mouse_atlas.h5ad)
+* [InSilico](http://zhanglab.net/SCALE_SOURCE_DATA/InSilico.h5ad)
+* [Leukemia](http://zhanglab.net/SCALE_SOURCE_DATA/Leukemia.h5ad)
+* [GM12878vsHEK](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHEK.h5ad)
+* [GM12878vsHL](http://zhanglab.net/SCALE_SOURCE_DATA/GM12878vsHL.h5ad)
+* [Breast_Tumor](http://zhanglab.net/SCALE_SOURCE_DATA/Breast_Tumor.h5ad)
 
 
 ## Reference
