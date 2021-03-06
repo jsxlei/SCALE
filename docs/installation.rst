@@ -1,5 +1,7 @@
-# Installation
+============
+Installation
+============
 
-# PyPI
+Install the package with pip::
 
-pip install scale-atac
+    $ pip install scale-atac
