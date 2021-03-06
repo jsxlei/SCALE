@@ -1,15 +1,20 @@
 SCALE (Single-Cell Analysis via Latent feature Extraction)
 ===========================================================
 
+
+Contents:
+
 .. toctree::
    :maxdepth: 1
    :hidden:
 
    tutorial
    installation
-   api/index
-   release-notes/index
    news
-   dev/index
-   contributors
-   references
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
