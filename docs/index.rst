@@ -8,7 +8,7 @@ SCALE (Single-Cell Analysis via Latent feature Extraction)
 
    installation
    tutorial
-   api
+   api/index
    news
    
    
