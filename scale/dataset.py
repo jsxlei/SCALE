@@ -159,7 +159,7 @@ def preprocessing_atac(
         
     if log: log.info('Batch specific maxabs scaling')
     
-    adata.X = maxabs_scale(adata.X)
+#     adata.X = maxabs_scale(adata.X)
 #     adata = batch_scale(adata, chunk_size=chunk_size)
     
     print('Processed dataset shape: {}'.format(adata.shape))
