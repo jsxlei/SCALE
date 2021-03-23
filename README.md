@@ -2,6 +2,8 @@
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
 ## News 
+2021.03.23 Our updated version [SCALE v2](https://github.com/jsxlei/SCALE_v2) for single-cell integration is to released!!! 
+2021.03.23 Introduce the select_var_feature from Episcanpy to filter peaks
 2021.01.14 Update to compatible with [h5ad](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) file and [scanpy](https://scanpy.readthedocs.io/en/stable/index.html)
 
 ## Installation  

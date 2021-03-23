@@ -19,6 +19,7 @@ from torch.utils.data import DataLoader
 
 from anndata import AnnData
 import scanpy as sc
+import episcanpy as epi
 from sklearn.preprocessing import maxabs_scale, MaxAbsScaler
 
 from glob import glob
@@ -126,7 +127,9 @@ def concat_data(
 def preprocessing_atac(
         adata, 
         min_genes=200, 
-        min_cells=0.01,  
+        min_cells=0.01, 
+        n_top_genes=30000,
+        target_sum=None,
         chunk_size=CHUNK_SIZE,
         log=None
     ):
@@ -137,6 +140,8 @@ def preprocessing_atac(
     if log: log.info('Preprocessing')
     if not issparse(adata.X):
         adata.X = scipy.sparse.csr_matrix(adata.X)
+        
+    adata.X[adata.X>1] = 1
     
     if log: log.info('Filtering cells')
     sc.pp.filter_cells(adata, min_genes=min_genes)
@@ -146,10 +151,15 @@ def preprocessing_atac(
         min_cells = min_cells * adata.shape[0]
     sc.pp.filter_genes(adata, min_cells=min_cells)
     
-
+    if log: log.info('Finding variable features')
+    adata = epi.pp.select_var_feature(adata, nb_features=n_top_genes, show=False, copy=True)
+    
+    if log: log.infor('Normalizing total per cell')
+    sc.pp.normalize_total(adata, target_sum=target_sum)
+        
     if log: log.info('Batch specific maxabs scaling')
-    adata.X[adata.X>1] = 1
-#     adata.X = maxabs_scale(adata.X)
+    
+    adata.X = maxabs_scale(adata.X)
 #     adata = batch_scale(adata, chunk_size=chunk_size)
     
     print('Processed dataset shape: {}'.format(adata.shape))

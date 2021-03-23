@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='SCALE: Single-Cell ATAC-seq Analysis via Latent feature Extraction')
     parser.add_argument('--data_list', '-d', type=str, nargs='+', default=[])
-    parser.add_argument('--n_centroids', '-k', type=int, help='cluster number')
+    parser.add_argument('--n_centroids', '-k', type=int, help='cluster number', default=30)
     parser.add_argument('--outdir', '-o', type=str, default='output/', help='Output path')
     parser.add_argument('--verbose', action='store_true', help='Print loss of training process')
     parser.add_argument('--pretrain', type=str, default=None, help='Load the trained model')
@@ -92,13 +92,13 @@ if __name__ == '__main__':
     cell_num = adata.shape[0] 
     input_dim = adata.shape[1] 	
     
-    if args.n_centroids is None:
-        k = estimate_k(adata.X.T)
-        print('Estimate k = {}'.format(k))
-    else:
-        k = args.n_centroids
+#     if args.n_centroids is None:
+#         k = estimate_k(adata.X.T)
+#         print('Estimate k = {}'.format(k))
+#     else:
+#         k = args.n_centroids
     lr = args.lr
-    
+    k = args.n_centroids
     
     outdir = args.outdir+'/'
     if not os.path.exists(outdir):
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     dims = [input_dim, args.latent, args.encode_dim, args.decode_dim]
     model = SCALE(dims, n_centroids=k)
-#     print(model)
+    print(model)
 
     if not args.pretrain:
         print('\n## Training Model ##')
