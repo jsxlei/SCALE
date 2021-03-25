@@ -1,3 +1,6 @@
+[![Stars](https://img.shields.io/github/stars/jsxlei/SCALE?logo=GitHub&color=yellow)](https://github.com/jsxlei/scale/stargazers)
+[![PyPI](https://img.shields.io/pypi/v/scale-atac.svg)](https://pypi.org/project/scale-atac)
+[![Downloads](https://pepy.tech/badge/scale-atac)](https://pepy.tech/project/scale-atac)
 # Single-Cell ATAC-seq analysis via Latent feature Extraction
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
