@@ -13,6 +13,10 @@
 
 SCALE neural network is implemented in [Pytorch](https://pytorch.org/) framework.  
 Running SCALE on CUDA is recommended if available.   
+
+#### install from PyPI
+
+    pip install scale
 	
 #### install from GitHub
 

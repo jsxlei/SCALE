@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
-setup(name='scale-atac',
+setup(name='scale',
       version='1.1.0',
       packages=find_packages(),
       description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
