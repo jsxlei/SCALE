@@ -5,7 +5,7 @@
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
 ## News 
-2021.03.23 Our updated version [SCALEX](https://github.com/jsxlei/SCALEX) for single-cell integration is released on [bioRxiv](https://www.biorxiv.org/content/10.1101/2021.04.06.438536v1)!!!  
+
 2021.03.23 Introduce the select_var_feature from Episcanpy to filter peaks  
 2021.01.14 Update to compatible with [h5ad](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) file and [scanpy](https://scanpy.readthedocs.io/en/stable/index.html)
 
