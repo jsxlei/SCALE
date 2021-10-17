@@ -152,7 +152,8 @@ def preprocessing_atac(
     sc.pp.filter_genes(adata, min_cells=min_cells)
     
     if log: log.info('Finding variable features')
-    adata = epi.pp.select_var_feature(adata, nb_features=n_top_genes, show=False, copy=True)
+    if n_top_genes != -1:
+        adata = epi.pp.select_var_feature(adata, nb_features=n_top_genes, show=False, copy=True)
     
     if log: log.infor('Normalizing total per cell')
     sc.pp.normalize_total(adata, target_sum=target_sum)
@@ -217,7 +218,7 @@ def load_dataset(
         batch_name='batch',
         min_genes=600, 
         min_cells=3, 
-        n_top_genes=2000, 
+        n_top_genes=30000, 
         batch_size=64, 
         chunk_size=CHUNK_SIZE,
         log=None,
@@ -238,6 +239,7 @@ def load_dataset(
         adata, 
         min_genes=min_genes, 
         min_cells=min_cells, 
+        n_top_genes=n_top_genes,
         chunk_size=chunk_size,
         log=log,
     )
