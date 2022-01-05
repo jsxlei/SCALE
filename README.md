@@ -52,11 +52,11 @@ Output will be saved in the output folder including:
 * **umap.pdf**:  visualization of 2d UMAP embeddings of each cell
 
 #### Imputation  
-Get binary imputed data in folder **binary_imputed** with option **--binary** (recommended for saving storage)
+Get binary imputed data in adata.h5ad file using scanpy **adata.obsm['binary']** with option **--binary** (recommended for saving storage)
 
     SCALE.py -d [input] --binary  
     
-or get numerical imputed data in file **imputed_data.txt** with option **--impute**
+or get numerical imputed data in adata.h5ad file using scanpy **adata.obsm['imputed']** with option **--impute**
 
     SCALE.py -d [input] --impute
      
