@@ -165,5 +165,6 @@ if __name__ == '__main__':
     if args.binary:
         adata.obsm['impute'] = model.encodeBatch(testloader, device=device, out='x')
         adata.obsm['binary'] = binarization(adata.obsm['impute'], adata.X)
+        del adata.obsm['impute']
     
     adata.write(outdir+'adata.h5ad', compression='gzip')
