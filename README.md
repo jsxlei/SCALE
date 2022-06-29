@@ -5,8 +5,8 @@
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
 ## News 
-2021.04    A new online integration tool [SCALEX](https://github.com/jsxlei/SCALEX) on scRNA-seq and scATAC-seq is available!
-2021.03.23 Introduce the select_var_feature from Episcanpy to filter peaks  
+2021.04    A new online integration tool [SCALEX](https://github.com/jsxlei/SCALEX) on scRNA-seq and scATAC-seq is available!  
+2021.03.23 Introduce the highly_variable_genes from scanpy to filter peaks  
 2021.01.14 Update to compatible with [h5ad](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) file and [scanpy](https://scanpy.readthedocs.io/en/stable/index.html)
 
 ## Installation  
@@ -18,7 +18,11 @@ Running SCALE on CUDA is recommended if available.
 
     pip install scale
 	
-#### install from GitHub
+#### install latest develop version from GitHub
+
+	pip install git+https://github.com/jsxlei/SCALE.git
+
+or download and install
 
 	git clone git://github.com/jsxlei/SCALE.git
 	cd SCALE
@@ -36,6 +40,7 @@ Installation only requires a few minutes.
 	* **count file**: count in **mtx** format, filename contains key word **"count"** / **"matrix"**    
 	* **peak file**: 1-column of peaks **chr_start_end**, filename contains key word **"peak"**  
 	* **barcode file**: 1-column of barcodes, filename contains key word **"barcode"**
+* h5mu file, e.g. filename.h5mu/atac
 
 #### Run 
 
@@ -64,7 +69,8 @@ or get numerical imputed data in adata.h5ad file using scanpy **adata.obsm['impu
 * save results in a specific folder: [-o] or [--outdir] 
 * embed feature by tSNE or UMAP: [--embed]  tSNE/UMAP
 * filter low quality cells by valid peaks number, default 100: [--min_peaks] 
-* filter low quality peaks by valid cells number, default 10: [--min_cells]
+* filter low quality peaks by valid cells number, default 0.01: [--min_cells]
+* filter peaks by selecting highly variable features, default 100,000: [--n_feature], disable by [--n_feature] -1.
 * modify the initial learning rate, default is 0.002: [--lr]  
 * change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
 * change random seed for parameter initialization, default is 18: [--seed]

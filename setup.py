@@ -13,7 +13,7 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(name='scale',
-      version='1.1.0',
+      version='1.1.1',
       packages=find_packages(),
       description='Single-Cell ATAC-seq Analysis via Latent feature Extraciton',
       long_description='',

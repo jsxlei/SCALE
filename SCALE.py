@@ -50,7 +50,7 @@ if __name__ == '__main__':
     parser.add_argument('--latent', '-l',type=int, default=10, help='latent layer dim')
     parser.add_argument('--min_peaks', type=float, default=100, help='Remove low quality cells with few peaks')
     parser.add_argument('--min_cells', type=float, default=0.01, help='Remove low quality peaks')
-    parser.add_argument('--n_feature', type=int, default=30000, help='Keep the number of highly variable peaks')
+    parser.add_argument('--n_feature', type=int, default=100000, help='Keep the number of highly variable peaks')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')
     parser.add_argument('--weight_decay', type=float, default=5e-4)
@@ -154,11 +154,11 @@ if __name__ == '__main__':
     if args.embed == 'UMAP':
         sc.tl.umap(adata, min_dist=0.1)
         color = [c for c in ['celltype', args.cluster_method] if c in adata.obs]
-        sc.pl.umap(adata, color=color, save='.pdf', wspace=0.4, ncols=4)
+        sc.pl.umap(adata, color=color, save='.png', wspace=0.4, ncols=4)
     elif args.embed == 'tSNE':
         sc.tl.tsne(adata, use_rep='latent')
         color = [c for c in ['celltype', args.cluster_method] if c in adata.obs]
-        sc.pl.tsne(adata, color=color, save='.pdf', wspace=0.4, ncols=4)
+        sc.pl.tsne(adata, color=color, save='.png', wspace=0.4, ncols=4)
     
     if args.impute:
         adata.obsm['impute'] = model.encodeBatch(testloader, device=device, out='x')

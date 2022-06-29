@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 
 from anndata import AnnData
 import scanpy as sc
-import episcanpy as epi
+# import episcanpy as epi
 from sklearn.preprocessing import maxabs_scale, MaxAbsScaler
 
 from glob import glob
@@ -70,6 +70,9 @@ def load_file(path):
             adata = AnnData(df.values, dict(obs_names=df.index.values), dict(var_names=df.columns.values))
         elif path.endswith('.h5ad'):
             adata = sc.read_h5ad(path)
+    elif path.endswith(tuple(['.h5mu/rna', '.h5mu/atac'])):
+        import muon as mu
+        adata = mu.read(path)
     else:
         raise ValueError("File {} not exists".format(path))
         
@@ -151,12 +154,13 @@ def preprocessing_atac(
         min_cells = min_cells * adata.shape[0]
     sc.pp.filter_genes(adata, min_cells=min_cells)
     
-    if log: log.info('Finding variable features')
     if n_top_genes != -1:
-        adata = epi.pp.select_var_feature(adata, nb_features=n_top_genes, show=False, copy=True)
+        if log: log.info('Finding variable features')
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, inplace=False, subset=True)
+        # adata = epi.pp.select_var_feature(adata, nb_features=n_top_genes, show=False, copy=True)
     
-    if log: log.infor('Normalizing total per cell')
-    sc.pp.normalize_total(adata, target_sum=target_sum)
+    # if log: log.infor('Normalizing total per cell')
+    # sc.pp.normalize_total(adata, target_sum=target_sum)
         
     if log: log.info('Batch specific maxabs scaling')
     
@@ -217,7 +221,7 @@ def load_dataset(
         batch_key='batch', 
         batch_name='batch',
         min_genes=600, 
-        min_cells=3, 
+        min_cells=0.01, 
         n_top_genes=30000, 
         batch_size=64, 
         chunk_size=CHUNK_SIZE,
