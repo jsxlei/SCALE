@@ -117,7 +117,7 @@ class VAE(nn.Module):
             max_iter=30000,
             verbose=True,
             patience=100,
-            outdir='./'
+            outdir=None,
        ):
 
         self.to(device)
@@ -238,7 +238,7 @@ def adjust_learning_rate(init_lr, optimizer, iteration):
 import os
 class EarlyStopping:
     """Early stops the training if loss doesn't improve after a given patience."""
-    def __init__(self, patience=10, verbose=False, outdir='./'):
+    def __init__(self, patience=10, verbose=False, outdir=None):
         """
         Args:
             patience (int): How long to wait after last time loss improved.
@@ -252,7 +252,7 @@ class EarlyStopping:
         self.best_score = None
         self.early_stop = False
         self.loss_min = np.Inf
-        self.model_file = os.path.join(outdir, 'model.pt')
+        self.model_file = os.path.join(outdir, 'model.pt') if outdir else None
 
     def __call__(self, loss, model):
         if np.isnan(loss):
@@ -278,5 +278,6 @@ class EarlyStopping:
         '''Saves model when loss decrease.'''
         if self.verbose:
             print(f'Loss decreased ({self.loss_min:.6f} --> {loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), self.model_file)
+        if self.model_file:
+            torch.save(model.state_dict(), self.model_file)
         self.loss_min = loss

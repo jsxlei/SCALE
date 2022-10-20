@@ -45,10 +45,6 @@ Installation only requires a few minutes.
 #### Run 
 
     SCALE.py -d [input]
-    
-if cluster number k is known:
-
-    SCALE.py -d [input] -k [k]
 
 #### Output
 Output will be saved in the output folder including:
@@ -69,7 +65,7 @@ or get numerical imputed data in adata.h5ad file using scanpy **adata.obsm['impu
 * save results in a specific folder: [-o] or [--outdir] 
 * embed feature by tSNE or UMAP: [--embed]  tSNE/UMAP
 * filter low quality cells by valid peaks number, default 100: [--min_peaks] 
-* filter low quality peaks by valid cells number, default 0.01: [--min_cells]
+* filter low quality peaks by valid cells number, default 3: [--min_cells]
 * filter peaks by selecting highly variable features, default 100,000: [--n_feature], disable by [--n_feature] -1.
 * modify the initial learning rate, default is 0.002: [--lr]  
 * change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
