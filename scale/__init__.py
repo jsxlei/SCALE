@@ -216,7 +216,12 @@ def SCALE_function(
 
     # 2. cluster
     sc.pp.neighbors(adata, n_neighbors=30, use_rep='latent')
-    sc.tl.leiden(adata)
+    if cluster_method == 'leiden':
+        sc.tl.leiden(adata)
+    elif cluster_method == 'kmeans':
+        from sklearn.cluster import KMeans
+        kmeans = KMeans(n_clusters=k, n_init=20, random_state=0)
+        adata.obs['kmeans'] = kmeans.fit_predict(adata.obsm['latent']).astype(str)
 
 
     sc.set_figure_params(dpi=80, figsize=(6,6), fontsize=10)
@@ -227,11 +232,11 @@ def SCALE_function(
         save = None
     if  embed == 'UMAP':
         sc.tl.umap(adata, min_dist=0.1)
-        color = [c for c in ['celltype',  'leiden', 'cell_type'] if c in adata.obs]
+        color = [c for c in ['celltype',  'kmeans', 'leiden', 'cell_type'] if c in adata.obs]
         sc.pl.umap(adata, color=color, save=save, show=False, wspace=0.4, ncols=4)
     elif  embed == 'tSNE':
         sc.tl.tsne(adata, use_rep='latent')
-        color = [c for c in ['celltype',  'leiden', 'cell_type'] if c in adata.obs]
+        color = [c for c in ['celltype',  'kmeans', 'leiden', 'cell_type'] if c in adata.obs]
         sc.pl.tsne(adata, color=color, save=save, show=False, wspace=0.4, ncols=4)
     
     if  impute:
