@@ -49,7 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('--decode_dim', type=int, nargs='*', default=[], help='encoder structure')
     parser.add_argument('--latent', '-l',type=int, default=10, help='latent layer dim')
     parser.add_argument('--min_peaks', type=float, default=100, help='Remove low quality cells with few peaks')
-    parser.add_argument('--min_cells', type=float, default=0.01, help='Remove low quality peaks')
+    parser.add_argument('--min_cells', type=float, default=3, help='Remove low quality peaks')
     parser.add_argument('--n_feature', type=int, default=100000, help='Keep the number of highly variable peaks')
     parser.add_argument('--log_transform', action='store_true', help='Perform log2(x+1) transform')
     parser.add_argument('--max_iter', '-i', type=int, default=30000, help='Max iteration')

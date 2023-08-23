@@ -1,12 +1,12 @@
 [![Stars](https://img.shields.io/github/stars/jsxlei/SCALE?logo=GitHub&color=yellow)](https://github.com/jsxlei/scale/stargazers)
-[![PyPI](https://img.shields.io/pypi/v/scale-atac.svg)](https://pypi.org/project/scale-atac)
-[![Downloads](https://pepy.tech/badge/scale-atac)](https://pepy.tech/project/scale-atac)
+[![PyPI](https://img.shields.io/pypi/v/scale.svg)](https://pypi.org/project/scale)
+[![Downloads](https://pepy.tech/badge/scale)](https://pepy.tech/project/scale-atac)
 # Single-Cell ATAC-seq analysis via Latent feature Extraction
 ![](https://github.com/jsxlei/SCALE/wiki/png/model.png)
 
 ## News 
-2021.04    A new online integration tool [SCALEX](https://github.com/jsxlei/SCALEX) on scRNA-seq and scATAC-seq is available!  
-2021.03.23 Introduce the highly_variable_genes from scanpy to filter peaks  
+2022.06.30 Introduce the highly_variable_genes from scanpy to filter peaks and support for input from multiomics data h5mu
+2021.04    A new online integration tool [SCALEX](https://github.com/jsxlei/SCALEX) on scRNA-seq and scATAC-seq is available!    
 2021.01.14 Update to compatible with [h5ad](https://anndata.readthedocs.io/en/latest/anndata.AnnData.html) file and [scanpy](https://scanpy.readthedocs.io/en/stable/index.html)
 
 ## Installation  
@@ -45,10 +45,6 @@ Installation only requires a few minutes.
 #### Run 
 
     SCALE.py -d [input]
-    
-if cluster number k is known:
-
-    SCALE.py -d [input] -k [k]
 
 #### Output
 Output will be saved in the output folder including:
@@ -66,15 +62,16 @@ or get numerical imputed data in adata.h5ad file using scanpy **adata.obsm['impu
     SCALE.py -d [input] --impute
      
 #### Useful options  
-* save results in a specific folder: [-o] or [--outdir] 
-* embed feature by tSNE or UMAP: [--embed]  tSNE/UMAP
-* filter low quality cells by valid peaks number, default 100: [--min_peaks] 
-* filter low quality peaks by valid cells number, default 0.01: [--min_cells]
-* filter peaks by selecting highly variable features, default 100,000: [--n_feature], disable by [--n_feature] -1.
-* modify the initial learning rate, default is 0.002: [--lr]  
-* change iterations by watching the convergence of loss, default is 30000: [-i] or [--max_iter]  
-* change random seed for parameter initialization, default is 18: [--seed]
-* binarize the imputation values: [--binary]
+* [--outdir] or [-o]: save results in a specific folder
+* [--embed]: tSNE/UMAP, embed feature by tSNE or UMAP 
+* [--min_peaks]: filter low quality cells by valid peaks number, default 100
+* [--min_cells]: filter low quality peaks by valid cells number, default 3 (previous default is 0.01), now replaced by [--n_feature] 
+* [--n_feature]: filter peaks by selecting highly variable features, default 100,000; use [--n_feature] -1 to disable.
+* [--lr]: modify the initial learning rate, default is 0.002: 
+* [--max_iter] or [-i]: max iteration number, default is 30000  
+* [--seed]: random seed for parameter initialization, default is 18 
+* [--binary]: binarize the imputation values
+* [-k]: if cluster number is known
 	
 
 #### Help

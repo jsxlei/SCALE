@@ -25,7 +25,7 @@ from sklearn.preprocessing import maxabs_scale, MaxAbsScaler
 from glob import glob
 
 np.warnings.filterwarnings('ignore')
-DATA_PATH = os.path.expanduser("~")+'/.scalex/'
+DATA_PATH = os.path.expanduser("~")+'/.scale/'
 CHUNK_SIZE = 20000
 
 
@@ -110,6 +110,8 @@ def concat_data(
         return load_files(data_list[0])
     elif isinstance(data_list, str):
         return load_files(data_list)
+    elif isinstance(data_list, AnnData):
+        return data_list
     adata_list = []
     for root in data_list:
         adata = load_files(root)
@@ -130,7 +132,7 @@ def concat_data(
 def preprocessing_atac(
         adata, 
         min_genes=200, 
-        min_cells=0.01, 
+        min_cells=3, # 0.01, 
         n_top_genes=30000,
         target_sum=None,
         chunk_size=CHUNK_SIZE,
@@ -220,8 +222,8 @@ def load_dataset(
         join='inner', 
         batch_key='batch', 
         batch_name='batch',
-        min_genes=600, 
-        min_cells=0.01, 
+        min_genes=200, 
+        min_cells=3, # 0.01 previous default 
         n_top_genes=30000, 
         batch_size=64, 
         chunk_size=CHUNK_SIZE,
